@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RuntimeIdentifiers>win10-x64;osx.10.12-x64</RuntimeIdentifiers>
+    <StartupObject>Lexicotron.UI.Program</StartupObject>
+    <AssemblyName>Lexicotron</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lexicotron.Core\Lexicotron.Core.csproj" />
+  </ItemGroup>
+
+</Project>
