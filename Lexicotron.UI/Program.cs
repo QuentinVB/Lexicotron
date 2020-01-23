@@ -1,6 +1,6 @@
 ﻿using Lexicotron.Core;
-using Lexicotron.IO;
 using System;
+using System.Collections.Generic;
 
 namespace Lexicotron.UI
 {
@@ -12,15 +12,14 @@ namespace Lexicotron.UI
             
             Console.WriteLine("Hello World!");
 
-            Console.WriteLine($"Dictionnary for this article has  { article.Words.Count} element.");
-
-            article.AddWord(Console.ReadLine());
-
-            Console.WriteLine($"Word added, dictionnary for this article has now {article.Words.Count} element. ");
-
             Console.WriteLine($"Executing folder is {Helpers.GetExecutingDirectoryName()}");
 
-            FileReader.read(Helpers.GetExecutingDirectoryName());
+            List<Article> articles = Process.ProcessDirectory(Helpers.GetExecutingDirectoryName());
+
+            foreach (Article item in articles)
+            {
+                Console.WriteLine(item);
+            }
 
             Console.ReadLine();
         }

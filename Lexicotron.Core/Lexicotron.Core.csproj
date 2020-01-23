@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lexicotron.Database\Lexicotron.Database.csproj" />
-    <ProjectReference Include="..\Lexicotron.IO\Lexicotron.IO.csproj" />
   </ItemGroup>
 
 </Project>
