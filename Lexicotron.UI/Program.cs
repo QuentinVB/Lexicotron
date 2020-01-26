@@ -8,13 +8,14 @@ namespace Lexicotron.UI
     {
         static void Main(string[] args)
         {
-            Article article = new Article();
             
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Lexicotron v1.0");
 
-            Console.WriteLine($"Executing folder is {Helpers.GetExecutingDirectoryName()}");
+            Console.WriteLine($"Executing folder is {Helpers.GetExecutingDirectoryPath()}");
 
-            List<Article> articles = Process.ProcessDirectory(Helpers.GetExecutingDirectoryName());
+            List<Article> articles = Process.ProcessDirectory(Helpers.GetExecutingDirectoryPath()+"\\Input\\");//
+
+            FileWriter.PrintArticlesSummary(articles);
 
             foreach (Article item in articles)
             {

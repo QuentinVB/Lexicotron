@@ -8,9 +8,14 @@ namespace Lexicotron.Core
 {
     public class Helpers
     {
-        public static string GetExecutingDirectoryName()
+        public static string GetExecutingDirectoryPath()
         {
-            return System.IO.Path.GetDirectoryName(new System.Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).LocalPath);
+            return Environment.CurrentDirectory;
+            /*
+            return Path.GetDirectoryName(
+                new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath
+                );
+                */
         }
     }
 }

@@ -12,6 +12,8 @@ https://stackify.com/cross-platform-net-core-apps/
 
 https://docs.microsoft.com/fr-fr/dotnet/standard/io/how-to-read-text-from-a-file
 
+https://docs.microsoft.com/fr-fr/dotnet/api/system.io.stream?view=netframework-4.8
+
 output data
 
 filename ; wordCoutd ; verbCount ; nounCount ; adjectiveCount ; lexicalField1_1wordCount ; lexicalField_csword

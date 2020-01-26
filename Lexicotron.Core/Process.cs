@@ -7,22 +7,19 @@ namespace Lexicotron.Core
 {
     public class Process
     {
-        public static List<Article> ProcessDirectory(string path)//async
-        {
-            
-            string[] fileEntries = Directory.GetFiles(path);
+        public static List<Article> ProcessDirectory(string path)//async -> return async enumerable (glup)
+        {           
+            string[] fileEntries = Directory.GetFiles(path,"*.txt");
 
             List<Article> _articles = new List<Article>(fileEntries.Length);
 
             foreach (string filePath in fileEntries)
             {
-                if (filePath.EndsWith(".txt"))
-                {
+                //if (filePath.EndsWith(".txt"))
                     //TODO : strip path + use array instead of list
                     Article article = new Article(GetNameOnlyFromPath(filePath));
                     _articles.Add(article);
                     FileReader.ProcessFile(article, filePath);
-                }
                     
             }
 
@@ -36,6 +33,7 @@ namespace Lexicotron.Core
             {
                 if(path[i]=='\\')
                 {
+                    i++;
                     return path[i..]; //substitute path.Substring(i, path.Length - i); :)
                 }
 

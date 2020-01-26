@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CsvHelper.Configuration.Attributes;
+using System;
 using System.Collections.Generic;
 
 namespace Lexicotron.Core
@@ -6,6 +7,7 @@ namespace Lexicotron.Core
     public class Article
     {
         readonly string _filename;
+        int _totalWordCount=0;
         Dictionary<string,int> _words;
 
         public Article()
@@ -21,10 +23,13 @@ namespace Lexicotron.Core
             _filename = filename;
             _words = words;
         }
-
+        [Ignore]
         public Dictionary<string, int> Words { get => _words; set => _words = value; }
 
         public string Filename => _filename;
+
+        public int TotalWordCount { get => _totalWordCount; }
+        public int DistinctWordCount { get => _words.Count; }
 
         public bool IncrementWord(string word)
         {
@@ -42,7 +47,8 @@ namespace Lexicotron.Core
 
         public bool AddWord(string word)
         {
-            if(!_words.TryAdd(word, 1))
+            _totalWordCount++;
+            if (!_words.TryAdd(word, 1))
             {
                 _words[word]++; return false;
             }

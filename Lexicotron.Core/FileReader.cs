@@ -20,13 +20,17 @@ namespace Lexicotron.Core
                     char c = (char)sr.Read();
                     while (c != (char)65535)
                     {     
-                        //TODO: strip ponctuation " " . , : ; - ! ?
-                        if (Char.IsWhiteSpace(c))
+                        //strip ponctuation " " . , : ; - ! ?
+                        if (char.IsWhiteSpace(c) || !char.IsLetterOrDigit(c))
                         {
-                            string word = stringBuilder.ToString();
-                            //Console.WriteLine(word);
-                            article.AddWord(word);
-                            stringBuilder.Clear();
+                            if(stringBuilder.Length>0)
+                            {
+                                string word = stringBuilder.ToString();
+
+                                //Console.WriteLine(word);
+                                article.AddWord(word.ToLower());
+                                stringBuilder.Clear();
+                            }    
                         }
                         else
                         {
