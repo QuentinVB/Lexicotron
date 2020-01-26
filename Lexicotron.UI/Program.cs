@@ -16,6 +16,7 @@ namespace Lexicotron.UI
             List<Article> articles = Process.ProcessDirectory(Helpers.GetExecutingDirectoryPath()+"\\Input\\");//
 
             FileWriter.PrintArticlesSummary(articles);
+            FileWriter.PrintArticles(articles);
 
             foreach (Article item in articles)
             {

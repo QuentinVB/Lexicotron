@@ -34,7 +34,7 @@ namespace Lexicotron.Core
                 if(path[i]=='\\')
                 {
                     i++;
-                    return path[i..]; //substitute path.Substring(i, path.Length - i); :)
+                    return (path[i..])[0..^4]; //substitute path.Substring(i, path.Length - i); :)
                 }
 
                 i--;
