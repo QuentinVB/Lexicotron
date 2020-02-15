@@ -17,3 +17,11 @@ https://docs.microsoft.com/fr-fr/dotnet/api/system.io.stream?view=netframework-4
 output data
 
 filename ; wordCoutd ; verbCount ; nounCount ; adjectiveCount ; lexicalField1_1wordCount ; lexicalField_csword
+
+
+verbe : forme infinitive uniquement
+lemme  uniquement
+
+fréquence rapporté au texte
+
+

@@ -9,8 +9,17 @@ namespace Lexicotron.Core
 {
     public class Lexicotron
     {
-        public static List<Article> ProcessDirectory(string path, List<Word> wordlexic)//async -> return async enumerable (glup)
-        {           
+        List<Word> lexicon;
+
+        public List<Word> Lexicon { get => lexicon; set => lexicon = value; }
+
+        public Lexicotron()
+        {
+        }
+        public List<Article> ProcessDirectory(string path)//async -> return async enumerable (glup)
+        {
+            if (Lexicon == null) throw new InvalidOperationException();
+
             string[] fileEntries = Directory.GetFiles(path,"*.txt");
 
             List<Article> _articles = new List<Article>(fileEntries.Length);
@@ -25,7 +34,7 @@ namespace Lexicotron.Core
                 _articles.Add(article);
                 FileReader.ProcessFile(article, filePath);  
                 
-                GetWordsInfo(article, wordlexic);
+                GetWordsInfo(article);
 
                 //TODO : search for lexical field
 
@@ -43,17 +52,20 @@ namespace Lexicotron.Core
              
              */
 
-        private static void GetWordsInfo(Article article, List<Word> wordlexic)
+        private void GetWordsInfo(Article article)
         {
+            if (Lexicon == null) throw new InvalidOperationException();
+
             Dictionary<string, WordProcessed> updatedWords = new Dictionary<string, WordProcessed>();
 
             foreach (WordProcessed word in article.Words.Values)
             {
-                var c = wordlexic.Where(w => w.ortho == word.Word).FirstOrDefault();
+                var c = Lexicon.Where(w => w.ortho == word.Word).FirstOrDefault();
                 if(c != null
                     && ( 
                     c.cgram == "VER"
-                    || c.cgram.StartsWith("ADJ")
+                    || c.cgram =="ADJ"
+                    //|| c.cgram.StartsWith("ADJ")
                     || c.cgram == "NOM")
                     )
                 {
@@ -71,7 +83,7 @@ namespace Lexicotron.Core
                 }       
             }
 
-            article.Words = updatedWords;
+            article.Words = updatedWords.OrderByDescending(w => w.Value.Occurence).ToDictionary(x=>x.Key,x=>x.Value);
         }
 
         public static string GetNameOnlyFromPath(string path)
