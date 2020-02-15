@@ -8,26 +8,25 @@ namespace Lexicotron.Core
     {
         readonly string _filename;
         int _totalWordCount=0;
-        Dictionary<string,int> _words;
+        Dictionary<string,WordProcessed> _words;
 
         public Article()
             :this(new Guid().ToString())
         { }
 
         public Article(string filename)
-            :this(filename,new Dictionary<string, int>())
+            :this(filename,new Dictionary<string, WordProcessed>())
         {}
 
-        public Article(string filename, Dictionary<string, int> words)
+        public Article(string filename, Dictionary<string, WordProcessed> words)
         {
             _filename = filename;
             _words = words;
         }
         [Ignore]
-        public Dictionary<string, int> Words { get => _words; set => _words = value; }
+        public Dictionary<string, WordProcessed> Words { get => _words; set => _words = value; }
 
         public string Filename => _filename;
-
         public int TotalWordCount { get => _totalWordCount; }
         public int DistinctWordCount { get => _words.Count; }
 
@@ -35,26 +34,25 @@ namespace Lexicotron.Core
         {
             if(_words.ContainsKey(word))
             {
-                _words[word]++;
+                _words[word].Occurence++;
+                return true;
+
             }
             else
             {
-                _words.Add(word, 1);
+                _words.Add(word, new WordProcessed() {Word = word, Occurence = 1 });
                 return false;
             }
-            return true;
         }
 
         public bool AddWord(string word)
         {
-            _totalWordCount++;
-            if (!_words.TryAdd(word, 1))
+            if (!_words.TryAdd(word,  new WordProcessed() { Word = word, Occurence = 1 }))
             {
-                _words[word]++; return false;
+                _words[word].Occurence++;
+                return true;
             }
-
-
-            return true;
+            return false;
         }
 
         public override string ToString()

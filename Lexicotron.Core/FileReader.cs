@@ -14,7 +14,7 @@ namespace Lexicotron.Core
 
             try
             {   // Open the text file using a stream reader.
-                using (StreamReader sr = new StreamReader(filename))//path + "\\sample.txt")
+                using (StreamReader sr = new StreamReader(filename,Encoding.UTF8))//path + "\\sample.txt")
                 {
 
                     char c = (char)sr.Read();

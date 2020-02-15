@@ -15,6 +15,8 @@ namespace Lexicotron.UI
 
             Console.WriteLine("Lexicotron v1.0");
             Console.WriteLine("Loading ressources...");
+
+            //TODO : load the ressources async
             var spin = new ConsoleSpinner();
             /*
              make it async
@@ -40,7 +42,9 @@ namespace Lexicotron.UI
             {
                 Console.WriteLine(item);
             }
-            
+
+            Console.WriteLine("Finished !");
+
             Console.ReadLine();
         }
     }

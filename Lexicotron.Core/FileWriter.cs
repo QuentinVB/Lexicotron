@@ -11,10 +11,14 @@ namespace Lexicotron.Core
     {
         public static void PrintArticlesSummary(List<Article> articles, string stamp)
         {
-            using (var writer = new StreamWriter($".\\Output\\articleSummary-{stamp}.csv"))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            //new CultureInfo("fr-FR")
+
+            using (var writer = new StreamWriter($".\\Output\\articleSummary-{stamp}.csv",true, Encoding.UTF8))
+            using (var csv = new CsvWriter(writer, new CultureInfo("fr-FR")))
             {
                 csv.Configuration.Delimiter = ";";
+                //csv.Configuration.Encoding = Encoding.UTF32;
+
                 csv.WriteRecords(articles);
             }
         }
@@ -23,11 +27,13 @@ namespace Lexicotron.Core
         {
             foreach (Article article in articles)
             {
-                using (var writer = new StreamWriter($".\\Output\\article-{article.Filename}-{stamp}.csv"))
-                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                //CultureInfo.InvariantCulture
+                using (var writer = new StreamWriter($".\\Output\\article-{article.Filename}-{stamp}.csv",true, Encoding.UTF8))
+                using (var csv = new CsvWriter(writer, new CultureInfo("fr-FR")))
                 {
                     csv.Configuration.Delimiter = ";";
-                    csv.WriteRecords(article.Words);
+                    //csv.Configuration.Encoding = Encoding.UTF32;
+                    csv.WriteRecords(article.Words.Values);
                 }
             }
             
