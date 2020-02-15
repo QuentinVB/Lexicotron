@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Lexicotron.Database;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace Lexicotron.Core
 {
-    public class Process
+    public class Lexicotron
     {
-        public static List<Article> ProcessDirectory(string path)//async -> return async enumerable (glup)
+        public static List<Article> ProcessDirectory(string path, IEnumerable<Word> wordlexic)//async -> return async enumerable (glup)
         {           
             string[] fileEntries = Directory.GetFiles(path,"*.txt");
 
@@ -19,8 +20,7 @@ namespace Lexicotron.Core
                     //TODO : strip path + use array instead of list
                     Article article = new Article(GetNameOnlyFromPath(filePath));
                     _articles.Add(article);
-                    FileReader.ProcessFile(article, filePath);
-                    
+                    FileReader.ProcessFile(article, filePath);                  
             }
 
             return _articles;

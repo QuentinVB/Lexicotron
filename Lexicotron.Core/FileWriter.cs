@@ -9,9 +9,9 @@ namespace Lexicotron.Core
 {
     public class FileWriter
     {
-        public static void PrintArticlesSummary(List<Article> articles)
+        public static void PrintArticlesSummary(List<Article> articles, string stamp)
         {
-            using (var writer = new StreamWriter($".\\Output\\articleSummary-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.csv"))
+            using (var writer = new StreamWriter($".\\Output\\articleSummary-{stamp}.csv"))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 csv.Configuration.Delimiter = ";";
@@ -19,12 +19,11 @@ namespace Lexicotron.Core
             }
         }
 
-        public static void PrintArticles(List<Article> articles)
+        public static void PrintArticles(List<Article> articles, string stamp)
         {
-            var startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             foreach (Article article in articles)
             {
-                using (var writer = new StreamWriter($".\\Output\\article-{article.Filename}-{startTimestamp}.csv"))
+                using (var writer = new StreamWriter($".\\Output\\article-{article.Filename}-{stamp}.csv"))
                 using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
                 {
                     csv.Configuration.Delimiter = ";";
