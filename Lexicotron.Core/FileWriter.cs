@@ -9,6 +9,11 @@ namespace Lexicotron.Core
 {
     public class FileWriter
     {
+        /// <summary>
+        /// Write down the article summary to a csv file
+        /// </summary>
+        /// <param name="articles">the article list to summarize</param>
+        /// <param name="stamp">the timestamp used to name the file</param>
         public static void PrintArticlesSummary(List<Article> articles, string stamp)
         {
             //new CultureInfo("fr-FR")
@@ -22,7 +27,11 @@ namespace Lexicotron.Core
                 csv.WriteRecords(articles);
             }
         }
-
+        /// <summary>
+        /// Write down article words statistics to a csv file
+        /// </summary>
+        /// <param name="articles">the article to write</param>
+        /// <param name="stamp">the timestamp used to name the file</param>
         public static void PrintArticles(List<Article> articles, string stamp)
         {
             foreach (Article article in articles)

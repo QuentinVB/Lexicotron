@@ -22,6 +22,8 @@ namespace Lexicotron.UI
             //TODO : load the ressources async
             Core.Lexicotron lexicotron = new Core.Lexicotron();
             var loading = loadRessources(lexicotron);
+            //lexicotron.Lexicon = CsvLoader.LoadCSV();
+
             /*
             while(!loading.IsCompleted)
             {
@@ -34,7 +36,6 @@ namespace Lexicotron.UI
             Console.WriteLine("Processing...");
 
             List<Article> articles = lexicotron.ProcessDirectory(directory + "\\Input\\");//
-
 
             FileWriter.PrintArticlesSummary(articles, startTimestamp); ;
             FileWriter.PrintArticles(articles, startTimestamp);
@@ -52,6 +53,7 @@ namespace Lexicotron.UI
         static async Task loadRessources(Core.Lexicotron lexicotron)
         {
             var loadLexicon = loadLexiconAsync();
+            //TODO: Add champs lexical ressources
 
             var allTasks = new List<Task> { loadLexicon };
             while (allTasks.Any())
@@ -68,6 +70,7 @@ namespace Lexicotron.UI
 
         private static Task<List<Word>> loadLexiconAsync()
         {
+            //TODO: Catching fail loading
             var result = CsvLoader.LoadCSV();
             return Task.FromResult(result);
         }

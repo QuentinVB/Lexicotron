@@ -7,6 +7,11 @@ namespace Lexicotron.Core
 {
     public class FileReader
     {
+        /// <summary>
+        /// Read a text file from path and count the distincts words in the given article
+        /// </summary>
+        /// <param name="article">the given article</param>
+        /// <param name="filename">path of file</param>
         public static void ProcessFile(Article article, string filename)
         {
             Console.WriteLine(filename);

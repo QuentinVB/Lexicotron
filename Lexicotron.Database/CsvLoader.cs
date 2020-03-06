@@ -9,6 +9,10 @@ namespace Lexicotron.Database
 {
     public class CsvLoader
     {
+        /// <summary>
+        /// Load a CSV, in this case, the french lexic
+        /// </summary>
+        /// <returns></returns>
         public static List<Word> LoadCSV()
         {
             List<Word> words;

@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Lexicotron.Core
 {
+    /// <summary>
+    /// Describe the summary of an article
+    /// </summary>
     public class ArticleSummary
     {
         public string FileName { get; set; }

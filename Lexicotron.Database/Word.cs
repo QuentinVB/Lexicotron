@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Lexicotron.Database
 {
+    /// <summary>
+    /// Describe a word from the french lexic database
+    /// </summary>
     public class Word
     {
         //public int Id { get; set; }
