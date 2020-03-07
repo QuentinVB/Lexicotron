@@ -18,7 +18,7 @@ namespace Lexicotron.Core
         {
             //new CultureInfo("fr-FR")
 
-            using (var writer = new StreamWriter($".\\Output\\articleSummary-{stamp}.csv",true, Encoding.UTF8))
+            using (var writer = new StreamWriter($".\\Output\\{stamp}-articleSummary.csv",true, Encoding.UTF8))
             using (var csv = new CsvWriter(writer, new CultureInfo("fr-FR")))
             {
                 csv.Configuration.Delimiter = ";";
@@ -37,7 +37,7 @@ namespace Lexicotron.Core
             foreach (Article article in articles)
             {
                 //CultureInfo.InvariantCulture
-                using (var writer = new StreamWriter($".\\Output\\article-{article.Filename}-{stamp}.csv",true, Encoding.UTF8))
+                using (var writer = new StreamWriter($".\\Output\\{stamp}-article-{article.Filename}.csv",true, Encoding.UTF8))
                 using (var csv = new CsvWriter(writer, new CultureInfo("fr-FR")))
                 {
                     csv.Configuration.Delimiter = ";";

@@ -73,12 +73,16 @@ namespace Lexicotron.Core
         /// <returns>true if the word is added</returns>
         public bool AddWord(string word)
         {
-            if (!_words.TryAdd(word,  new WordProcessed() { Word = word, Occurence = 1 }))
+            if (_words.ContainsKey(word))
             {
-                
+                _words[word].Occurence++;
+                return false;
+            }
+            else 
+            {
+                _words.Add(word, new WordProcessed() { Word = word, Occurence = 1 });
                 return true;
             }
-            return false;
         }
 
         public override string ToString()

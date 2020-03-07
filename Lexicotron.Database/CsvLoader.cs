@@ -22,7 +22,7 @@ namespace Lexicotron.Database
             //TODO add path helper
             //new CultureInfo("fr-FR")
             //CultureInfo.InvariantCulture
-            using (var reader = new StreamReader("Lexique383.csv"))
+            using (var reader = new StreamReader(@"Data\Lexique383.csv"))
             using (var csv = new CsvReader(reader, new CultureInfo("fr-FR")))
             {
                 csv.Configuration.Delimiter = ";";

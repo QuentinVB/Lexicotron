@@ -38,8 +38,10 @@ namespace Lexicotron.Core
         /// </summary>
         public double FrequenceLemme { get; set; }
 
-        /*
-         Champs lexical
-             */
+        /// <summary>
+        /// The lexical fields of the word, separed by semicolon
+        /// </summary>
+        public string LexicalField { get; set; }
+
     }
 }

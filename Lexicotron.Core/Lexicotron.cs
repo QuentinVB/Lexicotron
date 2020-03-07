@@ -13,11 +13,16 @@ namespace Lexicotron.Core
     public class Lexicotron
     {
         List<Word> lexicon;
+        private Dictionary<string, string[]> lexicalField;
 
         /// <summary>
         /// the lexic of words, loaded from csv or excel file
         /// </summary>
         public List<Word> Lexicon { get => lexicon; set => lexicon = value; }
+        /// <summary>
+        /// the lexical field association, loaded from csv or excel file
+        /// </summary>
+        public Dictionary<string, string[]> LexicalField { get => lexicalField; set => lexicalField = value; }
 
         public Lexicotron()
         {
@@ -29,7 +34,8 @@ namespace Lexicotron.Core
         /// <returns></returns>
         public List<Article> ProcessDirectory(string path)//async -> return async enumerable (glup) ?
         {
-            if (Lexicon == null) throw new InvalidOperationException("the lexic is not loaded");
+            if (Lexicon == null) throw new InvalidOperationException("the lexic database is not loaded");
+            if (LexicalField == null) throw new InvalidOperationException("the lexical field database is not loaded");
 
             string[] fileEntries = Directory.GetFiles(path,"*.txt");
 
@@ -46,15 +52,13 @@ namespace Lexicotron.Core
                 //ADD processing operations here
                 GetWordsInfo(article);
 
-                //TODO : search for lexical field
+                GetLexicalFields(article);
 
                 article.Words.OrderBy(w => w.Value.Occurence);
             }
 
             return _articles;
         }
-
-
         /*
          VER
          ADJ
@@ -101,6 +105,17 @@ namespace Lexicotron.Core
             article.Words = updatedWords.OrderByDescending(w => w.Value.Occurence).ToDictionary(x=>x.Key,x=>x.Value);
         }
 
+
+        private void GetLexicalFields(Article article)
+        {
+            foreach (WordProcessed word in article.Words.Values)
+            {
+                //TODO: search if the word is in the lexicals fields
+                word.LexicalField = "none;none";
+            }
+        }
+
+
         /// <summary>
         /// Helper to get the name of the file from the path.
         /// </summary>
@@ -116,7 +131,7 @@ namespace Lexicotron.Core
                 if(path[i]=='\\')
                 {
                     i++;
-                    return (path[i..])[0..^4]; //substitute path.Substring(i, path.Length - i); :)
+                    return path.Substring(i, path.Length - i); //(path[i..])[0..^4]; //
                 }
 
                 i--;
