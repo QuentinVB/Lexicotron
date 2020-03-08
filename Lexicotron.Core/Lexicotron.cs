@@ -20,7 +20,7 @@ namespace Lexicotron.Core
         /// </summary>
         public List<Word> Lexicon { get => lexicon; set => lexicon = value; }
         /// <summary>
-        /// the lexical field association, loaded from csv or excel file
+        /// the lexical field association, word->lexicalfields[], loaded from csv or excel file
         /// </summary>
         public Dictionary<string, string[]> LexicalField { get => lexicalField; set => lexicalField = value; }
 
@@ -111,7 +111,11 @@ namespace Lexicotron.Core
             foreach (WordProcessed word in article.Words.Values)
             {
                 //TODO: search if the word is in the lexicals fields
-                word.LexicalField = "none;none";
+
+                if(LexicalField.TryGetValue(word.Word, out string[] lexicalFields))
+                {
+                    word.LexicalField = String.Join(";", lexicalFields);
+                }
             }
         }
 

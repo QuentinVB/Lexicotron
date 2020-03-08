@@ -26,7 +26,7 @@ namespace Lexicotron.UI
         {
             string startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-            Console.WriteLine("Lexicotron v1.0");
+            Console.WriteLine("Lexicotron v1.2");
             Console.WriteLine("Loading ressources...");
 
             Core.Lexicotron lexicotron = new Core.Lexicotron();
@@ -44,12 +44,13 @@ namespace Lexicotron.UI
             FileWriter.PrintArticlesSummary(articles, startTimestamp); ;
             FileWriter.PrintArticles(articles, startTimestamp);
 
-            
-            Console.WriteLine("Finished !");
             foreach (Article item in articles)
             {
                 Console.WriteLine(item);
             }
+
+            Console.WriteLine("Finished !");
+            
             
             Console.ReadLine();
         }
@@ -59,7 +60,7 @@ namespace Lexicotron.UI
             var loadLexicon = loadLexiconAsync();
             var loadLexicalField = loadLexicalFieldAsync();
 
-            //TODO: Add champs lexical ressources
+            //TODO: Add hyperonymie ressources
 
             var allTasks = new List<Task> { loadLexicon , loadLexicalField };
             while (allTasks.Any())
@@ -82,15 +83,33 @@ namespace Lexicotron.UI
 
         private static Task<List<Word>> loadLexiconAsync()
         {
-            //TODO: Catching failed loading
-            var result = CsvLoader.LoadCSV();
+            List<Word> result;
+
+            try
+            {
+                result = CsvLoader.LoadCSV();
+
+            }
+            catch (Exception)
+            {
+
+                throw ;
+            }
             return Task.FromResult(result);
         }
 
         private static Task<Dictionary<string,string[]>> loadLexicalFieldAsync()
         {
-            //TODO: Catching failed loading
-            var result = ExcelLoader.LoadLexicalField(Helpers.GetExecutingDirectoryPath() + @"\Data\ChampsLexicaux.xlsx");
+            Dictionary<string, string[]> result;
+            try
+            {
+                result = ExcelLoader.LoadLexicalField(Helpers.GetExecutingDirectoryPath() + @"\Data\ChampsLexicaux.xlsx");
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
             return Task.FromResult(result);
         }
     }

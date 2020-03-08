@@ -49,6 +49,7 @@ namespace Lexicotron.Database
         public static Dictionary<string,string[]> LoadLexicalField(string path)
         {
             //TODO: make it cleaner
+            //word->lexical fields
             Dictionary<string, string[]> _lexicalFieldAssociations = new Dictionary<string, string[]>();
 
             Excel.Application xlApp;
@@ -76,7 +77,24 @@ namespace Lexicotron.Database
                 string lexicalField = (string)(range.Cells[rCnt, 1] as Excel.Range).Value2;
                 string[] words = ((string)(range.Cells[rCnt, 2] as Excel.Range).Value2).Split(';');
 
-                _lexicalFieldAssociations.Add(lexicalField, words);
+                for (int i = 0; i < words.Length; i++)
+                {
+                    if (_lexicalFieldAssociations.ContainsKey(words[i]))
+                    {
+                        string[] updatedLexicalFieldOfWord = new string[_lexicalFieldAssociations[words[i]].Length+1];
+                        
+                        _lexicalFieldAssociations[words[i]].CopyTo(updatedLexicalFieldOfWord, 0);
+
+                        updatedLexicalFieldOfWord[_lexicalFieldAssociations[words[i]].Length] = lexicalField;
+
+                        _lexicalFieldAssociations[words[i]] = updatedLexicalFieldOfWord;
+                    }
+                    else
+                    {
+                        _lexicalFieldAssociations.Add(words[i], new string[1] { lexicalField });
+                    }
+                }
+
             }
 
             xlWorkBook.Close(true, null, null);
