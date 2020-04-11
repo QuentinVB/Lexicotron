@@ -45,26 +45,38 @@ namespace Lexicotron.Core
             {
                 Article article = new Article(GetNameOnlyFromPath(filePath));
 
-                _articles.Add(article);
                 //load all the word
                 FileReader.ProcessFile(article, filePath);
                 
                 //ADD processing operations here
                 GetWordsInfo(article);
 
+                //add more lexical fields ?
                 GetLexicalFields(article);
 
-                article.Words.OrderBy(w => w.Value.Occurence);
+                //merge Lemme
+                MergeLemme(article);
+
+                //match heterony/hyperonym
+
+
+                article.Words = article.Words.OrderByDescending(w => w.Value.Occurence).ToDictionary(x => x.Key, x => x.Value);
+
+                _articles.Add(article);
+
             }
 
             return _articles;
         }
+
+        
+
         /*
-         VER
-         ADJ
-         NOM
-             
-             */
+VER
+ADJ
+NOM
+
+    */
         /// <summary>
         /// Get the Word information of the WordProcessed in the given article
         /// </summary>
@@ -102,10 +114,14 @@ namespace Lexicotron.Core
             }
 
             //substitute the words collection of the article by the filtred one
-            article.Words = updatedWords.OrderByDescending(w => w.Value.Occurence).ToDictionary(x=>x.Key,x=>x.Value);
+            article.Words = updatedWords;
         }
 
-
+        /// <summary>
+        /// Get the words lexical field from the lexical field dictionnary
+        /// TODO : get it from babelNet
+        /// </summary>
+        /// <param name="article">the given article</param>
         private void GetLexicalFields(Article article)
         {
             foreach (WordProcessed word in article.Words.Values)
@@ -117,6 +133,24 @@ namespace Lexicotron.Core
                     word.LexicalField = String.Join(";", lexicalFields);
                 }
             }
+        }
+
+        private void MergeLemme(Article article)
+        {
+            article.Words = (from WordProcessed w in article.Words.Values.ToList()
+                     group w by w.Lemme into nw
+                     select new WordProcessed
+                     {
+                         Word = nw.First().Lemme,
+                         Occurence = nw.Sum(a=>a.Occurence),
+                         Genre = nw.First().Genre,
+                         Nombre = nw.First().Nombre,
+                         GrammarCategory = nw.First().GrammarCategory,
+                         Lemme = nw.First().Lemme,
+                         FrequenceLemme = nw.First().FrequenceLemme,
+                         LexicalField = nw.First().LexicalField,
+                     })
+                     .ToDictionary(g => g.Word, g => g);
         }
 
 
@@ -142,5 +176,7 @@ namespace Lexicotron.Core
             } while (i > 0);
             throw new ArgumentException("Not a path provided");
         }
+
+        
     }
 }

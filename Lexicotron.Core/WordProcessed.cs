@@ -43,5 +43,15 @@ namespace Lexicotron.Core
         /// </summary>
         public string LexicalField { get; set; }
 
+        public override bool Equals(object obj)
+        {
+            return obj is WordProcessed processed &&
+                   Word == processed.Word;
+        }
+
+        public override int GetHashCode()
+        {
+            return -1121039451 + EqualityComparer<string>.Default.GetHashCode(Word);
+        }
     }
 }
