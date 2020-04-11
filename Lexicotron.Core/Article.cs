@@ -13,6 +13,8 @@ namespace Lexicotron.Core
         int _totalWordCount=0;
         Dictionary<string,WordProcessed> _words;
 
+       
+
         /// <summary>
         /// Create a blank article
         /// </summary>
@@ -42,6 +44,7 @@ namespace Lexicotron.Core
         /// ignored when printing the summary of articles
         /// </summary>
         [Ignore]
+        [NonPrintable]
         public Dictionary<string, WordProcessed> Words { get => _words; set => _words = value; }
 
         public string Filename => _filename;
@@ -88,6 +91,26 @@ namespace Lexicotron.Core
         public override string ToString()
         {
             return $"{Filename}, words stored : {_words.Count}";
+        }
+
+        public static Article Dummy(int dummyIndex)
+        {
+            Article dummy=  new Article("articletest "+ dummyIndex.ToString() );
+
+
+            dummy.Words.Add("test", new WordProcessed
+            {
+                Word = "test",
+                Genre = "m",
+                Nombre = "s",
+                Occurence = 1,
+                Lemme = "test",
+                FrequenceLemme = 1,
+                GrammarCategory = "noun",
+                LexicalField = "test"
+            });
+
+            return dummy;
         }
     }
 }

@@ -17,5 +17,19 @@ namespace Lexicotron.Core
                 );
                 */
         }
+
+       
+        
+    }
+    /// <summary>
+    /// Make the property non printable with excel
+    /// </summary>
+    public class NonPrintable : System.Attribute
+    {
+
+        public NonPrintable()
+        {
+
+        }
     }
 }

@@ -16,6 +16,9 @@ https://docs.microsoft.com/fr-fr/dotnet/api/system.io.stream?view=netframework-4
 
 http://csharp.net-informations.com/excel/csharp-read-excel.htm
 
+
+https://docs.microsoft.com/fr-fr/dotnet/api/microsoft.office.interop.excel?view=excel-pia
+
 output data
 
 filename ; wordCoutd ; verbCount ; nounCount ; adjectiveCount ; lexicalField1_1wordCount ; lexicalField_csword

@@ -9,6 +9,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lexicotron.Database", "Lexi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lexicotron.Core", "Lexicotron.Core\Lexicotron.Core.csproj", "{09668A60-18B0-4896-BFE0-37B4C92672DF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AC7117F4-E732-4CC0-932F-C8E7DED61DDD}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTest", "ConsoleTest\ConsoleTest.csproj", "{88704785-B348-4848-8A02-8C52A8983A0D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +34,10 @@ Global
 		{09668A60-18B0-4896-BFE0-37B4C92672DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09668A60-18B0-4896-BFE0-37B4C92672DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09668A60-18B0-4896-BFE0-37B4C92672DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88704785-B348-4848-8A02-8C52A8983A0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88704785-B348-4848-8A02-8C52A8983A0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88704785-B348-4848-8A02-8C52A8983A0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88704785-B348-4848-8A02-8C52A8983A0D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

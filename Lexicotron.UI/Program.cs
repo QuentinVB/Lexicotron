@@ -41,8 +41,7 @@ namespace Lexicotron.UI
 
             List<Article> articles = lexicotron.ProcessDirectory(directory + @"\Input\");//
 
-            FileWriter.PrintArticlesSummary(articles, startTimestamp); ;
-            FileWriter.PrintArticles(articles, startTimestamp);
+            FileWriter.PrintArticlesToExcel(articles, startTimestamp); ;
 
             foreach (Article item in articles)
             {
