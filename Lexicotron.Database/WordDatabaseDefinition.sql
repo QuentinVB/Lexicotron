@@ -30,4 +30,9 @@ CREATE TABLE IF NOT EXISTS `relation`
 
 INSERT INTO `relation` (`wordSource`,`relationGroup`,`synsetId`, `wordTarget`,`creationDate` ) VALUES( 1,	'synonym','b:zfiuzofiu5',1,date('now'));
 
+/*
 
+.mode column;
+.headers on;
+
+*/

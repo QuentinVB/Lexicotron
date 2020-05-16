@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTest", "ConsoleTest\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIRequestsTest", "APIRequestsTest\APIRequestsTest.csproj", "{A02DB3C8-F27C-4366-96C2-EED1A45ADF08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lexicotron.Tests", "Lexicotron.Tests\Lexicotron.Tests.csproj", "{C351D2E2-4B77-4F7E-B24E-81D46A2D5028}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{A02DB3C8-F27C-4366-96C2-EED1A45ADF08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A02DB3C8-F27C-4366-96C2-EED1A45ADF08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A02DB3C8-F27C-4366-96C2-EED1A45ADF08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C351D2E2-4B77-4F7E-B24E-81D46A2D5028}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C351D2E2-4B77-4F7E-B24E-81D46A2D5028}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C351D2E2-4B77-4F7E-B24E-81D46A2D5028}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C351D2E2-4B77-4F7E-B24E-81D46A2D5028}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
