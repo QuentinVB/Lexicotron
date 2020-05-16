@@ -30,3 +30,12 @@ lemme  uniquement
 fréquence rapporté au texte
 
 
+https://babelnet.org/guide
+
+GET
+Accept-Encoding: gzip
+&key={key}
+
+https://babelnet.io/v5/getSynsetIds?lemma={lemma}&searchLang={searchLang}&key={key}
+
+targetLang=FR

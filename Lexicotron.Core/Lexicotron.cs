@@ -126,8 +126,6 @@ NOM
         {
             foreach (WordProcessed word in article.Words.Values)
             {
-                //TODO: search if the word is in the lexicals fields
-
                 if(LexicalField.TryGetValue(word.Word, out string[] lexicalFields))
                 {
                     word.LexicalField = String.Join(";", lexicalFields);

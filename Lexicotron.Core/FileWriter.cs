@@ -12,8 +12,9 @@ namespace Lexicotron.Core
 {
     public class FileWriter
     {
+
         /// <summary>
-        /// Write down the article summary to a csv file
+        /// LEGACY : Write down the article summary to a csv file
         /// </summary>
         /// <param name="articles">the article list to summarize</param>
         /// <param name="stamp">the timestamp used to name the file</param>
@@ -31,7 +32,7 @@ namespace Lexicotron.Core
             }
         }
         /// <summary>
-        /// Write down article words statistics to a csv file
+        /// LEGACY :Write down article words statistics to a csv file
         /// </summary>
         /// <param name="articles">the article to write</param>
         /// <param name="stamp">the timestamp used to name the file</param>
