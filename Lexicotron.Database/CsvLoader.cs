@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using Lexicotron.Database.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

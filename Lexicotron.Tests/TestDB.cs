@@ -2,6 +2,7 @@
 using System.IO;
 using FluentAssertions;
 using Lexicotron.Database;
+using Lexicotron.Database.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lexicotron.Tests
@@ -120,6 +121,71 @@ namespace Lexicotron.Tests
             sut.TryAddWord(defaultDbWord2.Word, defaultDbWord2.SynsetId).Should().BeTrue();
             //act-assert
             sut.TryAddRelation(defaultDbWord2.Word, "b:578764644", "Hyperonym").Should().BeTrue();
+            sut.SynsetIdToSearch.Count.Should().Be(1);
+            //restore
+            sut.DeleteDatabase();
+        }
+        [TestMethod]
+        public void TestAddLog()
+        {
+            //arrange
+            LocalWordDB sut = new LocalWordDB();
+            sut.CreateDatabase();
+
+            sut.TryAddLog("b:576847","{'hdjkh':'result'}").Should().BeTrue();
+            //act-assert
+            //restore
+            sut.DeleteDatabase();
+        }
+        [TestMethod]
+        public void TestTodayCountLog()
+        {
+            //arrange
+            var date = DateTime.Now;
+            LocalWordDB sut = new LocalWordDB();
+            sut.CreateDatabase();
+
+            sut.TryAddLog("b:576847", "{'hdjkh':'result'}").Should().BeTrue();
+            //act-assert
+            sut.GetBabelRequestsCount(date).Should().Be(1);
+            //restore
+            sut.DeleteDatabase();
+        }
+
+        [DataTestMethod]
+        [DataRow(2019,01,01)]
+        [DataRow(1902,08, 24)]
+        public void TestNotTodayCountLog(int year, int month, int day)
+        {
+            //arrange
+            var date = new DateTime(year, month, day);
+            LocalWordDB sut = new LocalWordDB();
+            sut.CreateDatabase();
+
+            sut.TryAddLog("b:576847", "{'hdjkh':'result'}").Should().BeTrue();
+            //act-assert
+            sut.GetBabelRequestsCount(date).Should().Be(0);
+            //restore
+            sut.DeleteDatabase();
+        }
+
+        [DataTestMethod]
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(10)]
+        public void TestTodayMultipleCountLog(int count)
+        {
+            //arrange
+            LocalWordDB sut = new LocalWordDB();
+            sut.CreateDatabase();
+            for (int i = 0; i < count; i++)
+            {
+                sut.TryAddLog(Guid.NewGuid().ToString(), Guid.NewGuid().ToString()).Should().BeTrue();
+            }
+
+            //act-assert
+            sut.GetTodayBabelRequestsCount().Should().Be(count);
+            
             //restore
             sut.DeleteDatabase();
         }

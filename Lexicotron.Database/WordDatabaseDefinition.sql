@@ -32,7 +32,24 @@ INSERT INTO `relation` (`wordSource`,`relationGroup`,`synsetId`, `wordTarget`,`c
 
 /*
 
-.mode column;
-.headers on;
+.mode column
+.headers on 
+;
 
 */
+
+DROP TABLE IF EXISTS `babellog`
+CREATE TABLE IF NOT EXISTS `babellog` 
+(
+    `id` INTEGER PRIMARY KEY NOT NULL,
+    `requestDateTime` TEXT NOT NULL,
+    `synsetRequested` TEXT NOT NULL,
+    `jsonReturned` TEXT NOT NULL 
+);
+
+
+INSERT INTO `babellog` (`requestDateTime`,`synsetRequested`,`jsonReturned` ) VALUES(datetime('now'), "n:fezf45475","{'test':'valuetest'}")
+
+SELECT date(`requestDateTime`) as date, count(`requestDateTime`) as count FROM `babellog` WHERE date(`requestDateTime`) = date('now') GROUP BY date(`requestDateTime`);
+
+SELECT date(`requestDateTime`) FROM `babellog` WHERE date(`requestDateTime`) = date('now');

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Linq;
+using Lexicotron.Database.Models;
 
 namespace Lexicotron.Core
 {

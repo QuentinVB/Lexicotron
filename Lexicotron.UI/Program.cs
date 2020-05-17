@@ -1,5 +1,6 @@
 ﻿using Lexicotron.Core;
 using Lexicotron.Database;
+using Lexicotron.Database.Models;
 using Lexicotron.UI.ConsoleHelper;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,10 @@ namespace Lexicotron.UI
         {
             string startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-            Console.WriteLine("Lexicotron v1.2");
+            Console.WriteLine("Lexicotron v1.6");
+
+            //TODO : Mode choice Here : Explore/FindWordsRelations
+
             Console.WriteLine("Loading ressources...");
 
             Core.Lexicotron lexicotron = new Core.Lexicotron();
@@ -41,6 +45,7 @@ namespace Lexicotron.UI
 
             List<Article> articles = lexicotron.ProcessDirectory(directory + @"\Input\");//
 
+            //TODO : make it async with progression bar
             FileWriter.PrintArticlesToExcel(articles, startTimestamp); ;
 
             foreach (Article item in articles)

@@ -57,9 +57,9 @@ namespace Lexicotron.Database
             Excel.Worksheet xlWorkSheet;
             Excel.Range range;
 
-            string str;
+            //string str;
             int rCnt;
-            int cCnt;
+            //int cCnt;
             int rw = 0;
             int cl = 0;
 

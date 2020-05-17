@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Lexicotron.Database
+namespace Lexicotron.Database.Models
 {
     /// <summary>
     /// Describe a word from the french lexic database
