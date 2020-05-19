@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lexicotron.Database.Models;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,7 +8,7 @@ namespace Lexicotron.Core
     /// <summary>
     /// Define word output
     /// </summary>
-    public class WordProcessed
+    public class WordProcessed : IWord
     {
         /// <summary>
         /// The given word
@@ -43,15 +44,18 @@ namespace Lexicotron.Core
         /// </summary>
         public string LexicalField { get; set; }
 
-        public override bool Equals(object obj)
+        /*HyponymCount, HyperonymCount
+         */
+
+        public bool Equals(IWord other)
         {
-            return obj is WordProcessed processed &&
-                   Word == processed.Word;
+            if (other is null)
+                return false;
+
+            return other is WordProcessed && this.Word == other.Word;
         }
 
-        public override int GetHashCode()
-        {
-            return -1121039451 + EqualityComparer<string>.Default.GetHashCode(Word);
-        }
+        public override bool Equals(object obj) => Equals(obj as IWord);
+        public override int GetHashCode() => (Word).GetHashCode();
     }
 }

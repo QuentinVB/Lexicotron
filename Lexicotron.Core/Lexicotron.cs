@@ -15,6 +15,7 @@ namespace Lexicotron.Core
     {
         List<Word> lexicon;
         private Dictionary<string, string[]> lexicalField;
+        DALAdapter _dal;
 
         /// <summary>
         /// the lexic of words, loaded from csv or excel file
@@ -24,9 +25,11 @@ namespace Lexicotron.Core
         /// the lexical field association, word->lexicalfields[], loaded from csv or excel file
         /// </summary>
         public Dictionary<string, string[]> LexicalField { get => lexicalField; set => lexicalField = value; }
+        public DALAdapter Database { get => _dal; set => _dal = value; }
 
         public Lexicotron()
         {
+            _dal = new DALAdapter(new LocalWordDB());           
         }
         /// <summary>
         /// Load files from a given directory and process them, this is the reactor core !
@@ -57,6 +60,10 @@ namespace Lexicotron.Core
 
                 //merge Lemme
                 MergeLemme(article);
+
+                //insert word in db
+                //TODO: improve logging
+                Console.WriteLine("{0} words inserted in database",Database.InsertWords(article.Words.Values));
 
                 //match heterony/hyperonym
 

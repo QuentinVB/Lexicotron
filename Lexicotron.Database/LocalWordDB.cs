@@ -18,6 +18,8 @@ namespace Lexicotron.Database
         public LocalWordDB()
         {
             _synsetIdToSearch = new HashSet<string>();
+            if (!File.Exists(DbFile)) CreateDatabase();
+
         }
         public static string DbFile
         {
@@ -47,6 +49,7 @@ namespace Lexicotron.Database
                      "`word` TEXT UNIQUE NULL, " +
                      "`synsetId` TEXT UNIQUE NULL, " +
                      "`creationDate` TEXT NULL)");
+                con.Execute("CREATE INDEX idx_word ON `word`(`word`) ");
 
                 //relations
                 con.Execute("DROP TABLE IF EXISTS `relation`");
@@ -102,10 +105,25 @@ namespace Lexicotron.Database
             return false;
         }
 
-        /*
-         * TODO : a trygetwordS with batch requests
-         */
-        public bool TryAddWord(string word,string synsetId, bool fromSynset = false)
+
+        public bool TryGetWords(IEnumerable<IWord> words, out IEnumerable<DbWord> outdbWords)
+        {
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+            if (words.Count()==0) throw new InvalidDataException(nameof(words));
+
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                cnn.Open();
+                string sql = "SELECT * FROM `word` WHERE `word` IN @wordlist;";
+
+                outdbWords = cnn.Query<DbWord>(sql, new { wordlist = words.Select(x => x.Word).ToArray() });
+            
+
+                return true;
+            }
+        }
+
+        public bool TryAddWord(string word,string synsetId)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
             if (string.IsNullOrWhiteSpace(word) && string.IsNullOrWhiteSpace(synsetId)) throw new ArgumentNullException(nameof(word)+ nameof(synsetId));
@@ -117,7 +135,7 @@ namespace Lexicotron.Database
                 try
                 {
                     //https://sql.sh/cours/insert-into
-                    string sql = "INSERT INTO `word` (`word`,`synsetId`, `creationDate` ) VALUES( @Word,@SynsetId,date('now', 'localtime'));";
+                    string sql = "INSERT INTO `word` (`word`,`synsetId`, `creationDate` ) VALUES( @Word,@SynsetId,date('now'));";
 
                     cnn.Query<DbWord>(sql, new { Word = word, SynsetId = synsetId });
                     return true;
@@ -132,15 +150,61 @@ namespace Lexicotron.Database
             }
             return false;
         }
-        /*
-         * TODO : a tryAddwordS with transactions requests
-         */
+        public int TryAddWords(IEnumerable<IWord> words)
+        {
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+            if (words.Count()==0) throw new InvalidOperationException(nameof(words)+" is empty");
+
+            //TODO : Move the operation to the database
+            if(TryGetWords(words, out IEnumerable<DbWord> wordsFound))
+            {
+                words = words.Except(wordsFound).ToList();
+                if (words.Count() == 0) return 0;
+            }
+
+            //TODO : Cast IWord from DbWord to get synset
+
+            //TODO : transform word : to lower ?
+
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    try
+                    {
+                        string sql = "INSERT INTO `word` (`word`, `synsetId`, `creationDate` ) VALUES( @Word,null,date('now'));";
+                        int affectedRows = cnn.Execute(sql, words, transaction: transaction);
+
+                        transaction.Commit();
+
+                        if (affectedRows != words.Count()) throw new InvalidDataException();
+
+                        return affectedRows;
+                    }
+                    catch (Exception ex)
+                    {
+                        // roll the transaction back
+                        if (ex is SqlException sqlex)
+                        { 
+                            if (sqlex.Number == 2601 || sqlex.Number == 2627)
+                            {
+                                return 0;
+                            }
+                        }
+                        transaction.Rollback();
+
+                        throw;
+                    }
+                }
+            }
+        }
         public bool TryAddRelation(string wordSource, string synsetTargetId,string relationGroup)
         {
             if (!TryGetWord(wordSource, out DbWord dbwordsource)) throw new InvalidOperationException();
             if(!TryGetWord(synsetTargetId, out DbWord dbwordtarget,true))
             {
-                TryAddWord(null,synsetTargetId, true);
+                TryAddWord(null,synsetTargetId);
                 _synsetIdToSearch.Add(synsetTargetId);
             }
 
@@ -182,19 +246,18 @@ namespace Lexicotron.Database
                     {
                         return false;
                     }
-                    return false;
+                    throw;
                 }
             }
         }
+
         public bool TryAddLog(string synsetRequested, string jsonReturned)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
             if (synsetRequested == null || jsonReturned == null) throw new ArgumentNullException();
 
-
             using (SQLiteConnection cnn = SimpleDbConnection())
-            {
-               
+            {           
                 //https://sql.sh/cours/insert-into
                 string sql = "INSERT INTO `babellog` (`requestDateTime`,`synsetRequested`,`jsonReturned` ) " +
                     "VALUES(date('now', 'localtime'), @synsetRequested,@jsonReturned);";
@@ -203,8 +266,7 @@ namespace Lexicotron.Database
                 {
                     synsetRequested,
                     jsonReturned
-                });
-                
+                });   
             }
             return true;
 
@@ -234,6 +296,20 @@ namespace Lexicotron.Database
                 if (result.Count()>0) count = result.First().Count;
             }
             return count;
+        }
+
+
+        public int GetWordCount()
+        {
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                //https://sql.sh/cours/insert-into
+                string sql = "SELECT count(`wordid`) as Count FROM `word` ";
+
+                return cnn.QueryFirst<int>(sql);
+            }
         }
     }
 }

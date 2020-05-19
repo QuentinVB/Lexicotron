@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Lexicotron.Database.Models
 {
 #pragma warning disable CS0659 // Le type se substitue à Object.Equals(object o) mais pas à Object.GetHashCode()
-    public class DbWord
+    public class DbWord : IWord
 #pragma warning restore CS0659 // Le type se substitue à Object.Equals(object o) mais pas à Object.GetHashCode()
     {
         public int Id { get; set; }
@@ -21,15 +21,17 @@ namespace Lexicotron.Database.Models
         public int HyponymCount { get; set; }
         public DateTime CreationDate { get; set; }
 
-        public override bool Equals(object obj)
+
+        public bool Equals(IWord other)
         {
-            return obj is DbWord word &&
-                   Id == word.Id &&
-                   Word == word.Word &&
-                   SynsetId == word.SynsetId &&
-                   HyperonymCount == word.HyperonymCount &&
-                   HyponymCount == word.HyponymCount &&
-                   CreationDate == word.CreationDate;
+            if (other is null)
+                return false;
+
+            return other is IWord && this.Word == other.Word;
         }
+        public override bool Equals(object obj) => Equals(obj as IWord);
+        public override int GetHashCode() => (Word).GetHashCode();
+
+
     }
 }
