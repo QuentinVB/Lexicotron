@@ -192,6 +192,7 @@ namespace Lexicotron.Tests
             sut.TryAddLog("b:576847", "{'hdjkh':'result'}").Should().BeTrue();
             //act-assert
             sut.GetBabelRequestsCount(date).Should().Be(1);
+            sut.GetTodayBabelRequestsCount().Should().Be(1);
             //restore
             sut.DeleteDatabase();
         }
@@ -317,7 +318,6 @@ namespace Lexicotron.Tests
             wordlist2.Add(defaultDbWord);
             sut.TryAddWords(wordlist2).Should().Be(0, "the wordlist 2 should'nt be inserted");
 
-
             //restore
             sut.DeleteDatabase();
         }
@@ -349,6 +349,35 @@ namespace Lexicotron.Tests
             {
                 wordSelected[i].Should().Be(wordlist[i]);
             }
+
+            //restore
+            sut.DeleteDatabase();
+        }
+        [TestMethod]
+        public void TestSelectWordsWithoutSynset()
+        {
+            //arrange
+            LocalWordDB sut = new LocalWordDB();
+
+            sut.CreateDatabase();
+
+            List<DbWord> wordlist = new List<DbWord>
+            {
+                defaultDbWord,
+                defaultDbWord2,
+                new DbWord { Word = "test3", SynsetId = null, CreationDate = DateTime.Today }
+            };
+
+            foreach (DbWord word in wordlist)
+            {
+                sut.TryAddWord(word.Word, word.SynsetId).Should().BeTrue();
+            }
+            //act-assert
+
+
+            sut.TryGetWordsWithoutSynset(1000, out IEnumerable<DbWord> outdbWords).Should().Be(1);
+
+            outdbWords.First().Should().Be(wordlist.Last());
 
             //restore
             sut.DeleteDatabase();

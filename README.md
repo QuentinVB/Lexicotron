@@ -39,3 +39,5 @@ Accept-Encoding: gzip
 https://babelnet.io/v5/getSynsetIds?lemma={lemma}&searchLang={searchLang}&key={key}
 
 targetLang=FR
+
+https://app.quicktype.io

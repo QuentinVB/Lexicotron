@@ -10,7 +10,7 @@ using Lexicotron.Database.Models;
 namespace Lexicotron.Core
 {
 
-    public class DALAdapter
+    internal class DALAdapter
     {
         readonly LocalWordDB _dal;
 

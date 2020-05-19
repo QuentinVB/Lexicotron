@@ -25,7 +25,7 @@ namespace Lexicotron.Core
         /// the lexical field association, word->lexicalfields[], loaded from csv or excel file
         /// </summary>
         public Dictionary<string, string[]> LexicalField { get => lexicalField; set => lexicalField = value; }
-        public DALAdapter Database { get => _dal; set => _dal = value; }
+        internal DALAdapter Database { get => _dal; set => _dal = value; }
 
         public Lexicotron()
         {

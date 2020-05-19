@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIRequestsTest", "APIReque
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lexicotron.Tests", "Lexicotron.Tests\Lexicotron.Tests.csproj", "{C351D2E2-4B77-4F7E-B24E-81D46A2D5028}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lexicotron.BabelAPI", "Lexicotron.BabelAPI\Lexicotron.BabelAPI.csproj", "{3D3AE302-F6DF-4D12-9487-26E19FB11A81}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{C351D2E2-4B77-4F7E-B24E-81D46A2D5028}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C351D2E2-4B77-4F7E-B24E-81D46A2D5028}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C351D2E2-4B77-4F7E-B24E-81D46A2D5028}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D3AE302-F6DF-4D12-9487-26E19FB11A81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D3AE302-F6DF-4D12-9487-26E19FB11A81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D3AE302-F6DF-4D12-9487-26E19FB11A81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D3AE302-F6DF-4D12-9487-26E19FB11A81}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

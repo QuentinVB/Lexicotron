@@ -11,32 +11,53 @@ namespace Lexicotron.UI
 {
     class Program
     {
-        /*
-         var spin = new ConsoleSpinner();
-
-             //TODO : load the ressources async
-             
-             //lexicotron.Lexicon = CsvLoader.LoadCSV();
-
-
-             while(!loading.IsCompleted)
-             {
-                 spin.Turn();
-             }*/
         static void Main(string[] args)
         {
             string startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
             Console.WriteLine("Lexicotron v1.6");
+            Console.WriteLine(("").PadRight(44, '-'));
+            int number;
+            do
+            {
+                Console.WriteLine("Choose mode :");
+                Console.WriteLine(" 1. Explore articles words from \"input\" folder");
+                Console.WriteLine(" 2. Try retrive data from babel");
+                Console.WriteLine(("").PadRight(44, '-'));
+            } while (!Int32.TryParse(Console.ReadLine(), out number));
 
-            //TODO : Mode choice Here : Explore/FindWordsRelations
+            switch (number)
+            {
+                case 1:
+                    Console.WriteLine("Explore Mode");
+                    ExploreMode(startTimestamp);
+                    break;
+                case 2:
+                    Console.WriteLine("Retrive Mode");
 
+                    RetriveDataMode(startTimestamp);
+                    break;
+                default:
+                    break;
+            }
+            Console.WriteLine("Finished !");
+
+            Console.ReadLine();
+        }
+
+        public static void ExploreMode(string startTimestamp)
+        {
             Console.WriteLine("Loading ressources...");
 
             Core.Lexicotron lexicotron = new Core.Lexicotron();
 
-            var loading = loadRessources(lexicotron);          
-            
+            //var spin = new ConsoleSpinner();
+
+            var loading = loadRessources(lexicotron);
+            //while (!loading.IsCompleted)
+            //{
+            //    spin.Turn();
+            //}
             Console.WriteLine("Ressources loaded !");
 
             var directory = Helpers.GetExecutingDirectoryPath();
@@ -53,17 +74,17 @@ namespace Lexicotron.UI
                 Console.WriteLine(item);
             }
 
-            Console.WriteLine("Finished !");
-            
-            
-            Console.ReadLine();
         }
 
-        static async Task loadRessources(Core.Lexicotron lexicotron)
+        private static void RetriveDataMode(string startTimestamp)
+        {
+            Console.WriteLine("Here be dragonz");
+        }
+
+        private static async Task loadRessources(Core.Lexicotron lexicotron)
         {
             var loadLexicon = loadLexiconAsync();
             var loadLexicalField = loadLexicalFieldAsync();
-
             //TODO: Add hyperonymie ressources
 
             var allTasks = new List<Task> { loadLexicon , loadLexicalField };
@@ -82,6 +103,7 @@ namespace Lexicotron.UI
                 }
 
                 allTasks.Remove(finished);
+                
             }
         }
 

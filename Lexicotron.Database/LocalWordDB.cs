@@ -15,6 +15,8 @@ namespace Lexicotron.Database
     public class LocalWordDB
     {
         HashSet<string> _synsetIdToSearch;
+
+        //TODO : change db DAL to singleton
         public LocalWordDB()
         {
             _synsetIdToSearch = new HashSet<string>();
@@ -25,6 +27,8 @@ namespace Lexicotron.Database
         {
             get { return Environment.CurrentDirectory + "\\wordDb.sqlite"; }
         }
+
+        
 
         public HashSet<string> SynsetIdToSearch { get => _synsetIdToSearch; }
 
@@ -123,6 +127,20 @@ namespace Lexicotron.Database
             }
         }
 
+        public int TryGetWordsWithoutSynset(int amount, out IEnumerable<DbWord> outdbWords)
+        {
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                cnn.Open();
+                string sql = "SELECT * FROM `word` WHERE (`word` IS NOT NULL AND `synsetId` IS NULL) LIMIT @amount;";
+
+                outdbWords = cnn.Query<DbWord>(sql, new { amount });
+
+                return outdbWords.Count();
+            }
+        }
         public bool TryAddWord(string word,string synsetId)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
@@ -280,22 +298,19 @@ namespace Lexicotron.Database
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
             if (dateSelected == null ) throw new ArgumentNullException();
 
-            int count = 0;
             using (SQLiteConnection cnn = SimpleDbConnection())
             {             
                 //https://sql.sh/cours/insert-into
-                string sql = "SELECT date(`requestDateTime`) as Date, count(`requestDateTime`) as Count " +
+                string sql = "SELECT count(`requestDateTime`) as Count " +
                     "FROM `babellog` " +
                     "WHERE date(`requestDateTime`) = date(@dateSelected) " +
                     "GROUP BY date(@dateSelected)";
 
-                var result  = cnn.Query<DbLogCount>(sql, new
+                return cnn.QueryFirstOrDefault<int>(sql, new
                 {
                     dateSelected= dateSelected.ToString("o")
-                });
-                if (result.Count()>0) count = result.First().Count;
+                }) ;
             }
-            return count;
         }
 
 

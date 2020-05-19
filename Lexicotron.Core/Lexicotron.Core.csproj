@@ -63,12 +63,17 @@
     <Compile Include="WordProcessed.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Lexicotron.BabelAPI\Lexicotron.BabelAPI.csproj">
+      <Project>{3d3ae302-f6df-4d12-9487-26e19fb11a81}</Project>
+      <Name>Lexicotron.BabelAPI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Lexicotron.Database\Lexicotron.Database.csproj">
       <Project>{ae0f5366-0b45-4f3f-a03f-ea979fcee85f}</Project>
       <Name>Lexicotron.Database</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
