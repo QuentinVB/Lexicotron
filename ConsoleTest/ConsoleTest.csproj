@@ -50,6 +50,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Lexicotron.BabelAPI\Lexicotron.BabelAPI.csproj">
+      <Project>{3d3ae302-f6df-4d12-9487-26e19fb11a81}</Project>
+      <Name>Lexicotron.BabelAPI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Lexicotron.Core\Lexicotron.Core.csproj">
       <Project>{09668a60-18b0-4896-bfe0-37b4c92672df}</Project>
       <Name>Lexicotron.Core</Name>

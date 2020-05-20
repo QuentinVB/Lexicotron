@@ -32,7 +32,7 @@ namespace Lexicotron.BabelAPI.Models
 
         [JsonProperty("senseKey")]
         //[JsonConverter(typeof(ParseStringConverter))]
-        public long SenseKey { get; set; }
+        public string SenseKey { get; set; }
 
         [JsonProperty("frequency")]
         public long Frequency { get; set; }
@@ -56,7 +56,7 @@ namespace Lexicotron.BabelAPI.Models
         public bool BKeySense { get; set; }
 
         [JsonProperty("idSense")]
-        public long IdSense { get; set; }
+        public string IdSense { get; set; }
     }
 
     public partial class Pronunciations

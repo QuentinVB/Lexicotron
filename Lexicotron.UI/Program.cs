@@ -1,4 +1,5 @@
-﻿using Lexicotron.Core;
+﻿using Lexicotron.BabelAPI;
+using Lexicotron.Core;
 using Lexicotron.Database;
 using Lexicotron.Database.Models;
 using Lexicotron.UI.ConsoleHelper;
@@ -69,8 +70,6 @@ namespace Lexicotron.UI
             //TODO : make it async with progression bar 
             Console.WriteLine("Write to excel file...");
 
-            
-            
             foreach (ArticleGroup article in articles)
             {
                 FileWriter.PrintArticlesToExcel(article, startTimestamp); ;
@@ -82,6 +81,21 @@ namespace Lexicotron.UI
         private static void RetriveDataMode(string startTimestamp)
         {
             Console.WriteLine("Here be dragonz");
+            string apikey;
+            try
+            {
+                apikey = System.IO.File.ReadAllText(Helpers.GetExecutingDirectoryPath() + @"\babel.apikey");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+
+            BabelAPICore babelAPI = new BabelAPICore(apikey);
+
+            babelAPI.RetrieveWordSense(5);
+
         }
 
         private static async Task loadRessources(Core.Lexicotron lexicotron)

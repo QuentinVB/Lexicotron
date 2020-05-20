@@ -48,7 +48,7 @@ namespace APIRequestsTest
         static async Task RunAsync()
         {
             // Update port # in the following line.
-            client.BaseAddress = new Uri("http://localdev.les-planetes2kentin.fr/api/project/1");
+            //client.BaseAddress = new Uri("http://localdev.les-planetes2kentin.fr/api/project/1");
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json")
