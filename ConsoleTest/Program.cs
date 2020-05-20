@@ -14,7 +14,7 @@ namespace ConsoleTest
             string startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             Console.WriteLine("begin test");
 
-            FileWriter.PrintArticlesToExcel(new List<Article>() { Article.Dummy(1), Article.Dummy(2) }, startTimestamp);
+            //FileWriter.PrintArticlesToExcel(new List<Article>() { Article.Dummy(1), Article.Dummy(2) }, startTimestamp);
 
             Console.Read();
         }

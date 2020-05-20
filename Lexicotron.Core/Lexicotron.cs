@@ -32,6 +32,51 @@ namespace Lexicotron.Core
             _dal = new DALAdapter(new LocalWordDB());           
         }
         /// <summary>
+        /// LookRecrusively into each subfolder to process articles and groupe them
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public List<ArticleGroup> ProcessAllDirectory(string path)
+        {
+            Console.WriteLine("{0} words in the database", Database.GetWordCount());
+
+            List<ArticleGroup> _articleGroups = new List<ArticleGroup>();
+
+
+            void ExploreFolder(string localpath, string title)
+            {
+                string[] localFolders = Directory.GetDirectories(localpath);
+
+                if (Directory.GetFiles(localpath).Length > 0)
+                {
+                    Console.WriteLine($"Process files from sub-folder : {title}");
+                    _articleGroups.Add(new ArticleGroup
+                    {
+                        Name = title,
+                        Articles = ProcessDirectory(localpath)
+                    }); 
+                    Console.WriteLine("Sub-folder finished. {0} words in the database", Database.GetWordCount());
+
+                }
+                else if (localFolders.Length > 0)
+                {
+                    for (int i = 0; i < localFolders.Length; i++)
+                    {
+                        ExploreFolder(localFolders[i], title + (String.IsNullOrWhiteSpace(title) ? "" : "-") + GetNameOnlyFromPath(localFolders[i]));
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            ExploreFolder(path, "");
+
+            return _articleGroups;
+        }
+
+        /// <summary>
         /// Load files from a given directory and process them, this is the reactor core !
         /// </summary>
         /// <param name="path">the given relative path to the directory</param>
@@ -41,17 +86,21 @@ namespace Lexicotron.Core
             if (Lexicon == null) throw new InvalidOperationException("the lexic database is not loaded");
             if (LexicalField == null) throw new InvalidOperationException("the lexical field database is not loaded");
 
-            string[] fileEntries = Directory.GetFiles(path,"*.txt");
+            List<Article> _articles = new List<Article>();
 
-            List<Article> _articles = new List<Article>(fileEntries.Length);
             
+            
+            string[] fileEntries = Directory.GetFiles(path, "*.txt");
+                    
             foreach (string filePath in fileEntries)
             {
+                Console.WriteLine(" + {0}",GetNameOnlyFromPath(filePath));
+
                 Article article = new Article(GetNameOnlyFromPath(filePath));
 
                 //load all the word
                 FileReader.ProcessFile(article, filePath);
-                
+
                 //ADD processing operations here
                 GetWordsInfo(article);
 
@@ -63,7 +112,7 @@ namespace Lexicotron.Core
 
                 //insert word in db
                 //TODO: improve logging
-                Console.WriteLine("{0} words inserted in database",Database.InsertWords(article.Words.Values));
+                Console.WriteLine(" | {0} words inserted in database", Database.InsertWords(article.Words.Values));
 
                 //match heterony/hyperonym
 
@@ -71,9 +120,7 @@ namespace Lexicotron.Core
                 article.Words = article.Words.OrderByDescending(w => w.Value.Occurence).ToDictionary(x => x.Key, x => x.Value);
 
                 _articles.Add(article);
-
             }
-
             return _articles;
         }
 

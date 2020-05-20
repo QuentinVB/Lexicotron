@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Article.cs" />
+    <Compile Include="ArticleGroup.cs" />
     <Compile Include="DALAdapter.cs" />
     <Compile Include="FileReader.cs" />
     <Compile Include="FileWriter.cs" />

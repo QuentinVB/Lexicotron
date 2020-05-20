@@ -52,11 +52,14 @@ namespace Lexicotron.Core
             
         }
 
-        public static void PrintArticlesToExcel(List<Article> articles, string stamp)
+        public static void PrintArticlesToExcel(ArticleGroup articleGroup, string stamp)
         {
+            Console.WriteLine($" Writing {stamp}-{articleGroup.Name}.xlsx");
+            List<Article> articles = articleGroup.Articles;
+
             Excel.Application xlApp = new Excel.Application();
 
-            string path = Helpers.GetExecutingDirectoryPath() + $"\\Output\\{stamp}-articles.xlsx";
+            string path = Helpers.GetExecutingDirectoryPath() + $"\\Output\\{stamp}-{articleGroup.Name}.xlsx";
 
 
             if (xlApp == null)
@@ -87,8 +90,8 @@ namespace Lexicotron.Core
                     (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1)
                     : (Excel.Worksheet)worksheets.Add( Type.Missing, worksheets[articleIndex], Type.Missing, Type.Missing);
 
-                xlWorkSheet.Name = article.Filename;
-
+                //Max char is 31 remove Article-journal- before every filename
+                xlWorkSheet.Name = article.Filename.Truncate(30);
 
                 //print headers
                 PropertyInfo[] wordProperties = typeof(WordProcessed).GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -168,6 +171,7 @@ namespace Lexicotron.Core
 
             
             Marshal.ReleaseComObject(xlApp);
+            Console.WriteLine($" Finished writing !");
 
         }
     }

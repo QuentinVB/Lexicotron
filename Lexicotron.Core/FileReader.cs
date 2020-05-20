@@ -14,7 +14,6 @@ namespace Lexicotron.Core
         /// <param name="filename">path of file</param>
         public static void ProcessFile(Article article, string filename)
         {
-            Console.WriteLine(filename);
             StringBuilder stringBuilder = new StringBuilder();
 
             try

@@ -64,15 +64,18 @@ namespace Lexicotron.UI
             Console.WriteLine($"Executing folder is {directory}");
             Console.WriteLine("Processing...");
 
-            List<Article> articles = lexicotron.ProcessDirectory(directory + @"\Input\");//
+            List<ArticleGroup> articles = lexicotron.ProcessAllDirectory(directory + @"\Input\");//
 
-            //TODO : make it async with progression bar
-            FileWriter.PrintArticlesToExcel(articles, startTimestamp); ;
+            //TODO : make it async with progression bar 
+            Console.WriteLine("Write to excel file...");
 
-            foreach (Article item in articles)
+            
+            
+            foreach (ArticleGroup article in articles)
             {
-                Console.WriteLine(item);
+                FileWriter.PrintArticlesToExcel(article, startTimestamp); ;
             }
+            
 
         }
 

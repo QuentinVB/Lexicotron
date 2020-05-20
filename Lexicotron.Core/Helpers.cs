@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Lexicotron.Core
 {
-    public class Helpers
+    public static class Helpers
     {
         public static string GetExecutingDirectoryPath()
         {
@@ -18,8 +18,17 @@ namespace Lexicotron.Core
                 */
         }
 
-       
-        
+        /// <summary>
+        /// Truncate a string if too long
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="maxChars"></param>
+        /// <returns></returns>
+        public static string Truncate(this string value, int maxChars)
+        {
+            return value.Length <= maxChars ? value : value.Substring(0, maxChars) ;
+        }
+
     }
     /// <summary>
     /// Make the property non printable with excel
@@ -32,4 +41,5 @@ namespace Lexicotron.Core
 
         }
     }
+    
 }

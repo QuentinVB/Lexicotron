@@ -27,6 +27,9 @@ namespace Lexicotron.Core
             return DAL.TryAddWords(wordsToAdd);
         }
 
-
+        public int GetWordCount()
+        {
+            return DAL.GetWordCount();           
+        }
     }
 }
