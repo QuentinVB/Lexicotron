@@ -50,7 +50,7 @@ namespace Lexicotron.Database
                      "`wordid` INTEGER PRIMARY KEY NOT NULL, " +
                      "`word` TEXT UNIQUE NULL, " +
                      "`senseId` TEXT UNIQUE NULL, " +
-                     "`synsetId` TEXT UNIQUE NULL, " +
+                     "`synsetId` TEXT NULL, " +
                      "`creationDate` TEXT NULL)");
                 con.Execute("CREATE INDEX idx_word ON `word`(`word`) ");
 
@@ -107,22 +107,53 @@ namespace Lexicotron.Database
             }
             return false;
         }
+        public static IEnumerable<List<T>> SplitList<T>(List<T> locations, int nSize = 30)
+        {
+            for (int i = 0; i < locations.Count; i += nSize)
+            {
+                yield return locations.GetRange(i, Math.Min(nSize, locations.Count - i));
+            }
+        }
 
         public bool TryGetWords(IEnumerable<IWord> words, out IEnumerable<DbWord> outdbWords)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
             if (words.Count()==0) throw new InvalidDataException(nameof(words));
 
-            using (SQLiteConnection cnn = SimpleDbConnection())
+            IEnumerable<DbWord> FindWords(IEnumerable<IWord> wordsToFind)
             {
-                cnn.Open();
-                string sql = "SELECT * FROM `word` WHERE `word` IN @wordlist;";
+                using (SQLiteConnection cnn = SimpleDbConnection())
+                {
+                    cnn.Open();
+                    string sql = "SELECT * FROM `word` WHERE `word` IN @wordlist;";
 
-                outdbWords = cnn.Query<DbWord>(sql, new { wordlist = words.Select(x => x.Word).ToArray() });
-            
+                    return cnn.Query<DbWord>(sql, new { wordlist = wordsToFind.Select(x => x.Word).ToArray() });
+                }
+            }
 
+            //max words should be 999 according to SQLITE_MAX_VARIABLE_NUMBER https://www.sqlite.org/limits.html
+            int maxArgs = 900;
+            if (words.Count()> maxArgs)
+            {
+                IEnumerable<List<IWord>> lots = SplitList(words.ToList(), maxArgs);
+                List<DbWord> concatenedLots = new List<DbWord>();
+                foreach (List<IWord> lot in lots)
+                {
+                    concatenedLots.AddRange(FindWords(lot));
+                }
+
+                outdbWords = concatenedLots;
                 return true;
             }
+            else
+            {
+                outdbWords = FindWords(words);
+                return true;
+            }
+
+            
+
+            
         }
 
         public int TryGetWordsWithoutSynset(int amount, out IEnumerable<DbWord> outdbWords)
@@ -139,6 +170,8 @@ namespace Lexicotron.Database
                 return outdbWords.Count();
             }
         }
+
+        
         public bool TryAddWord(string word,string synsetId)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
@@ -166,17 +199,28 @@ namespace Lexicotron.Database
             }
             return false;
         }
-        public int TryAddWords(IEnumerable<IWord> words)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="words">the enumeration of words to insert</param>
+        /// <param name="safe">check if the words already exists in the database before insertion</param>
+        /// <returns></returns>
+        public int TryAddWords(IEnumerable<IWord> words, bool safe = true)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
             if (words.Count()==0) throw new InvalidOperationException(nameof(words)+" is empty");
 
             //TODO : Move the operation to the database
-            if(TryGetWords(words, out IEnumerable<DbWord> wordsFound))
+            //TODO : Add precheck to avoid double
+            if(safe)
             {
-                words = words.Except(wordsFound).ToList();
-                if (words.Count() == 0) return 0;
+                if (TryGetWords(words, out IEnumerable<DbWord> wordsFound))
+                {
+                    words = words.Except(wordsFound).ToList();
+                    if (words.Count() == 0) return 0;
+                }
             }
+            
 
             //TODO : Cast IWord from DbWord to get synset
 
@@ -322,20 +366,97 @@ namespace Lexicotron.Database
                 return cnn.QueryFirst<int>(sql);
             }
         }
-
-        public void UpdateOrAddWordsWithSynset(List<DbWord> dbwordToUpdate)
+        public int GetWordWithoutSynsetCount()
         {
-            //get words that are already into the database
-            if(TryGetWords(dbwordToUpdate,out IEnumerable<DbWord> dbwordalreadyindb))
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+
+            using (SQLiteConnection cnn = SimpleDbConnection())
             {
-                var wordalreadyindb = dbwordalreadyindb.ToHashSet();
+                //https://sql.sh/cours/insert-into
+                string sql = "SELECT count(`wordid`) as Count FROM `word` WHERE (`word` IS NOT NULL AND `synsetId` IS NULL) ";
 
-                //match synset
-
-                //wordalreadyindb.
+                return cnn.QueryFirst<int>(sql);
             }
-            //split dbwordto update : the words already in must be updated, the other must be added
-            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dbwordToUpdateOrAdd">the words to update or add</param>
+        /// <returns>a tuple with count of word inserted, then updated</returns>
+        public (int,int) UpdateOrAddWordsWithSynset(HashSet<DbWord> dbwordToUpdateOrAdd)
+        {
+            HashSet<DbWord> wordAlreadyInDb;
+            HashSet<DbWord> wordToAddInDb= new HashSet<DbWord>();
+            HashSet<DbWord> dbwordToUpdate=new HashSet<DbWord>();
+
+            //get words that are already into the database
+            if (TryGetWords(dbwordToUpdateOrAdd, out IEnumerable<DbWord> dbwordalreadyindb))
+            {
+                wordAlreadyInDb = dbwordalreadyindb.ToHashSet();
+
+                //TODO : Optimization
+                //split dbwordto update : the words already in must be updated, the other must be added
+                foreach (DbWord word in dbwordToUpdateOrAdd)
+                {
+                    //if word is already in db :  add to update
+                    if(wordAlreadyInDb.Contains(word))
+                    {
+                        dbwordToUpdate.Add(word);
+                    }
+                    //else add to add
+
+                    else
+                    {
+                        wordToAddInDb.Add(word);
+                    }
+                }
+            }
+            //update
+            int wordupdated = TryUpdateDbWords(dbwordToUpdate);
+            int wordsinserted = TryAddWords(wordToAddInDb,false);
+            return (wordsinserted,wordupdated);
+        }
+
+        public int TryUpdateDbWords(IEnumerable<DbWord> dbwordToUpdate)
+        {
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+            if (dbwordToUpdate == null) throw new ArgumentNullException();
+
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    try
+                    {
+                        string sql = "UPDATE `word` SET" +
+                            "`synsetId` = @SynsetId," +
+                            "`senseId` = @SenseId " +
+                            "WHERE `word` = @Word";
+                        int affectedRows = cnn.Execute(sql, dbwordToUpdate, transaction: transaction);
+
+                        transaction.Commit();
+
+                        if (affectedRows != dbwordToUpdate.Count()) throw new InvalidDataException();
+
+                        return affectedRows;
+                    }
+                    catch (Exception ex)
+                    {
+                        // roll the transaction back
+                        if (ex is SqlException sqlex)
+                        {
+                            if (sqlex.Number == 2601 || sqlex.Number == 2627)
+                            {
+                                return 0;
+                            }
+                        }
+                        transaction.Rollback();
+
+                        throw;
+                    }
+                }
+            }
         }
     }
 }

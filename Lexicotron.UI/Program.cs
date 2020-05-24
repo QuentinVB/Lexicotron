@@ -94,14 +94,22 @@ namespace Lexicotron.UI
             LocalWordDB database = new LocalWordDB();
             BabelAPICore babelAPI = new BabelAPICore(apikey,database);
 
-            var wordsenses = babelAPI.RetrieveWordSense(5);
+            int senses = 100;
+            Console.WriteLine("{0} sense to retrieve", senses);
+            Console.WriteLine("Asking babel...");
+            var wordsenses = babelAPI.RetrieveWordSense(senses);
 
             //convert words from Sense to DbWord list and log : SOLID VIOLATION !
-            List<DbWord> dbwordToUpdate = babelAPI.ParseBabelSenseToDbWord(wordsenses);
+            HashSet<DbWord> dbwordToUpdate = babelAPI.ParseBabelSenseToDbWord(wordsenses);
+            Console.WriteLine("{0} word to update or insert in the database", dbwordToUpdate.Count);
 
             //TODO : insert retrieved synset into database
-            database.UpdateOrAddWordsWithSynset(dbwordToUpdate);
-
+            var results = database.UpdateOrAddWordsWithSynset(dbwordToUpdate);
+            Console.WriteLine("{0} words inserted, {1} words updated", results.Item1, results.Item2);
+            int totalWordCount = database.GetWordCount();
+            int wordWithoutSynset = database.GetWordWithoutSynsetCount();
+            double stat = wordWithoutSynset  / totalWordCount * 100.0;
+            Console.WriteLine("{0} words in the database now, {1} are still without synset, {2}%", totalWordCount, wordWithoutSynset, stat);
         }
 
         private static async Task loadRessources(Core.Lexicotron lexicotron)

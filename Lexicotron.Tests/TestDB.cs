@@ -353,6 +353,38 @@ namespace Lexicotron.Tests
             //restore
             sut.DeleteDatabase();
         }
+        [DataTestMethod]
+        [DataRow(1000)]
+        [DataRow(2000)]
+        [DataRow(100)]
+        public void TestSelectManyManyMoreWords(int argsize)
+        {
+            //arrange
+            LocalWordDB sut = new LocalWordDB();
+
+            sut.CreateDatabase();
+
+            List<DbWord> wordlist = new List<DbWord>();
+            for (int i = 0; i < argsize; i++)
+            {
+                wordlist.Add(new DbWord { Word = Guid.NewGuid().ToString(), SynsetId = Guid.NewGuid().ToString(), CreationDate = DateTime.Today });
+            }
+            wordlist.Add(defaultDbWord);
+            wordlist.Add(defaultDbWord2);
+
+            sut.TryAddWord(defaultDbWord.Word, defaultDbWord.SynsetId).Should().BeTrue();
+            sut.TryAddWord(defaultDbWord2.Word, defaultDbWord2.SynsetId).Should().BeTrue();
+
+
+            //act
+            sut.TryGetWords(wordlist, out IEnumerable<DbWord> data2).Should().BeTrue();
+            //assert
+            var wordOut = data2.ToHashSet();
+            wordOut.Contains(defaultDbWord).Should().BeTrue();
+            wordOut.Contains(defaultDbWord2).Should().BeTrue();
+            //restore
+            sut.DeleteDatabase();
+        }
         [TestMethod]
         public void TestSelectWordsWithoutSynset()
         {
@@ -378,6 +410,45 @@ namespace Lexicotron.Tests
             sut.TryGetWordsWithoutSynset(1000, out IEnumerable<DbWord> outdbWords).Should().Be(1);
 
             outdbWords.First().Should().Be(wordlist.Last());
+
+            //restore
+            sut.DeleteDatabase();
+        }
+        [TestMethod]
+        public void TestUpdateManyWords()
+        {
+            //arrange
+            LocalWordDB sut = new LocalWordDB();
+
+            sut.CreateDatabase();
+
+            List<DbWord> wordlist = new List<DbWord>
+            {
+                defaultDbWord,
+                defaultDbWord2
+            };
+
+            sut.TryAddWord(defaultDbWord.Word, defaultDbWord.SynsetId).Should().BeTrue();
+            sut.TryAddWord(defaultDbWord2.Word, defaultDbWord2.SynsetId).Should().BeTrue();
+
+            var updatedSynset = "b:04704254";
+
+            List<DbWord> wordlist2 = new List<DbWord>
+            {
+                new DbWord { Word = "test", SynsetId =updatedSynset, CreationDate = DateTime.Today }
+            };
+
+            //act
+            sut.TryUpdateDbWords(wordlist2).Should().Be(1);
+
+            //assert
+
+            sut.TryGetWords(wordlist, out IEnumerable<DbWord> outDbWords).Should().BeTrue();
+
+            outDbWords.Count().Should().Be(wordlist.Count);
+
+            outDbWords.ToList().Where(x => x.Word == "test").First().SynsetId.Should().Be(updatedSynset);
+            
 
             //restore
             sut.DeleteDatabase();

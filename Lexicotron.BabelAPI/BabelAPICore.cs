@@ -93,24 +93,52 @@ namespace Lexicotron.BabelAPI
         /// </summary>
         /// <param name="wordsenses"></param>
         /// <returns>tuple with the db word to update and the list of db words to add</returns>
-        public List<DbWord> ParseBabelSenseToDbWord(List<(BabelLog, List<BabelSense>)> wordsenses)
+        public HashSet<DbWord> ParseBabelSenseToDbWord(List<(BabelLog, List<BabelSense>)> wordsenses)
         {
-            
-            List<DbWord> dbWords = new List<DbWord>();
+
+            HashSet<DbWord> dbWords = new HashSet<DbWord>();
             foreach (var item in wordsenses)
             {
+                DbWord requestedInitialy = new DbWord()
+                {
+                    Word = item.Item1.RequestedSynset,
+                };
+
+                dbWords.Add(requestedInitialy);
+
                 //log results
                 Database.LogBabelRequest(item.Item1.RequestedSynset, item.Item1.JsonReturned);
 
-                //store sense as dbword
-                foreach (BabelSense babelSense in item.Item2)
+                //var wordsense = item.Item2.Where(x => x.Properties.FullLemma.ToLower() == item.Item1.RequestedSynset.ToLower()).FirstOrDefault();
+
+                //store sense as dbword               
+                foreach(BabelSense babelSense in item.Item2)
                 {
                     if (babelSense.Properties.FullLemma.Contains("_")) continue;
-                    dbWords.Add(new DbWord() { 
-                        Word = babelSense.Properties.FullLemma.ToLower(),
-                        SynsetId = babelSense.Properties.SynsetId.Id,
-                        SenseId = babelSense.Properties.IdSense
-                    });
+                    else if (babelSense.Properties.Language != "FR") continue;
+                    else if(
+                        babelSense.Properties.Pos.Contains("NOUN")
+                        || babelSense.Properties.Pos.Contains("VER")
+                        || babelSense.Properties.Pos.Contains("ADJ")
+                        )
+                    {
+                        if (requestedInitialy.SynsetId == null && babelSense.Properties.FullLemma.ToLower() == requestedInitialy.Word)
+                        {
+                            requestedInitialy.SynsetId = babelSense.Properties.SynsetId.Id;
+                            requestedInitialy.SenseId = babelSense.Properties.IdSense;
+                        }
+                        else
+                        {
+                            dbWords.Add(new DbWord()
+                            {
+                                Word = babelSense.Properties.FullLemma.ToLower(),
+                                SynsetId = babelSense.Properties.SynsetId.Id,
+                                SenseId = babelSense.Properties.IdSense
+                            });
+                        }
+                    }
+                    
+                    
                 }
             }
             return dbWords;
