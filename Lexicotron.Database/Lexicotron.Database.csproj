@@ -82,6 +82,7 @@
     <Compile Include="CsvLoader.cs" />
     <Compile Include="ExcelLoader.cs" />
     <Compile Include="LocalWordDB.cs" />
+    <Compile Include="Models\BabelLog.cs" />
     <Compile Include="Models\DbRelation.cs" />
     <Compile Include="Models\DbWord.cs" />
     <Compile Include="Models\IWord.cs" />

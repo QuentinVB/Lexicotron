@@ -91,10 +91,16 @@ namespace Lexicotron.UI
                 throw;
             }
 
+            LocalWordDB database = new LocalWordDB();
+            BabelAPICore babelAPI = new BabelAPICore(apikey,database);
 
-            BabelAPICore babelAPI = new BabelAPICore(apikey);
+            var wordsenses = babelAPI.RetrieveWordSense(5);
 
-            babelAPI.RetrieveWordSense(5);
+            //convert words from Sense to DbWord list and log : SOLID VIOLATION !
+            List<DbWord> dbwordToUpdate = babelAPI.ParseBabelSenseToDbWord(wordsenses);
+
+            //TODO : insert retrieved synset into database
+            database.UpdateOrAddWordsWithSynset(dbwordToUpdate);
 
         }
 

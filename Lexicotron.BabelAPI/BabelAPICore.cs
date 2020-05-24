@@ -10,6 +10,7 @@ using Lexicotron.BabelAPI.Models;
 using Lexicotron.Database.Models;
 using System.IO;
 using System.Net;
+using Lexicotron.Database;
 
 namespace Lexicotron.BabelAPI
 {
@@ -24,10 +25,10 @@ namespace Lexicotron.BabelAPI
 
         internal DALAPIAdapter Database { get => _dal; set => _dal = value; }
 
-        public BabelAPICore(string apikey)
+        public BabelAPICore(string apikey, LocalWordDB database)
         {
             _apikey =apikey;
-            _dal = new DALAPIAdapter(new Database.LocalWordDB());
+            _dal = new DALAPIAdapter(database);
             
             //client.DefaultRequestHeaders.Accept.Add(new );
 
@@ -43,39 +44,25 @@ namespace Lexicotron.BabelAPI
             //TODO : url forge (using string builder + param)
         }
         //IEnumerable<IWord> words
-        public void RetrieveWordSense(int limit)
+        public List<(BabelLog, List<BabelSense>)> RetrieveWordSense(int limit)
         {
             int requestsAvailable = Database.RequestsAvailable();
 
             List<DbWord> wordswithoutsynset = Database.GetWordsWithoutSynset(Math.Min(requestsAvailable,limit)).ToList();
 
-            List<string> allRequests = new List<string>();
+            List<(BabelLog, List<BabelSense>)> results = ResolveRequests(wordswithoutsynset).Result.ToList();
 
-            foreach (DbWord word in wordswithoutsynset)
-            {
-                if (word.SynsetId != null) throw new InvalidDataException();
-                string url = $"https://babelnet.io/v5/getSenses?lemma={word.Word}&searchLang=FR&key={Apikey}";
-                //var data = await GetBabelSenseAsync(url);
-
-                allRequests.Add(url);
-            }
-
-            var results = ResolveRequests(allRequests).Result.ToList();
-
-            Console.WriteLine(results.Count());
-
-            //TODO : insert retrieved synset into database
-
+            return results;
         }
         
-        private async Task<IEnumerable<List<BabelSense>>> ResolveRequests(List<string> urls)
+        private async Task<IEnumerable<(BabelLog, List<BabelSense>)>> ResolveRequests(List<DbWord> words)
         {
-            List<Task<List<BabelSense>>> listOfTasks = new List<Task<List<BabelSense>>>();
+            List<Task<(BabelLog, List<BabelSense>)>> listOfTasks = new List<Task<(BabelLog, List<BabelSense>)>>();
             try
             {
-                foreach (string url in urls)
+                foreach (DbWord word in words)
                 {
-                    listOfTasks.Add(GetBabelSenseAsync(url));
+                    listOfTasks.Add(GetBabelSenseAsync(word));
                 }
                 return await Task.WhenAll(listOfTasks);
             }
@@ -86,18 +73,47 @@ namespace Lexicotron.BabelAPI
             }
         }
         
-        public async Task<List<BabelSense>> GetBabelSenseAsync(string path)
+        public async Task<(BabelLog, List<BabelSense>)> GetBabelSenseAsync(DbWord word)
         {
-            HttpResponseMessage response = await client.GetAsync(path);
+            HttpResponseMessage response = await client.GetAsync($"https://babelnet.io/v5/getSenses?lemma={word.Word}&searchLang=FR&key={Apikey}");
             if (response.IsSuccessStatusCode)
             {
                 //using newton soft
                 //Project m = JsonConvert.DeserializeObject<Project>(await response.Content.ReadAsStringAsync());
                 var babelsense = response.Content.ReadAsAsync<List<BabelSense>>().Result;
-                return babelsense;
+
+                BabelLog logentry = new BabelLog() {RequestedSynset = word.Word, JsonReturned = response.Content.ReadAsStringAsync().Result };
+
+                return (logentry, babelsense);
             }
             throw new TimeoutException();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="wordsenses"></param>
+        /// <returns>tuple with the db word to update and the list of db words to add</returns>
+        public List<DbWord> ParseBabelSenseToDbWord(List<(BabelLog, List<BabelSense>)> wordsenses)
+        {
+            
+            List<DbWord> dbWords = new List<DbWord>();
+            foreach (var item in wordsenses)
+            {
+                //log results
+                Database.LogBabelRequest(item.Item1.RequestedSynset, item.Item1.JsonReturned);
 
+                //store sense as dbword
+                foreach (BabelSense babelSense in item.Item2)
+                {
+                    if (babelSense.Properties.FullLemma.Contains("_")) continue;
+                    dbWords.Add(new DbWord() { 
+                        Word = babelSense.Properties.FullLemma.ToLower(),
+                        SynsetId = babelSense.Properties.SynsetId.Id,
+                        SenseId = babelSense.Properties.IdSense
+                    });
+                }
+            }
+            return dbWords;
         }
     }
 }

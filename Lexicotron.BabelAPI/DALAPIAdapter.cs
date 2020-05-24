@@ -2,6 +2,7 @@
 using Lexicotron.Database.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Lexicotron.BabelAPI
 {
@@ -33,6 +34,11 @@ namespace Lexicotron.BabelAPI
         {
             //TODO : put max request into const or config file
             return 1000-DAL.GetTodayBabelRequestsCount();
+        }
+
+        internal void LogBabelRequest(string synsetId, string json)
+        {
+            DAL.TryAddLog(synsetId, json);
         }
     }
 }

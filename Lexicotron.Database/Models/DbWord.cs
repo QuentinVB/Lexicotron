@@ -13,6 +13,7 @@ namespace Lexicotron.Database.Models
         public int Id { get; set; }
         public string Word { get; set; }
         public string SynsetId { get; set; }
+        public string SenseId { get; set; }
         /*
         Hypernym 
         Hyponym 

@@ -28,8 +28,6 @@ namespace Lexicotron.Database
             get { return Environment.CurrentDirectory + "\\wordDb.sqlite"; }
         }
 
-        
-
         public HashSet<string> SynsetIdToSearch { get => _synsetIdToSearch; }
 
         public static SQLiteConnection SimpleDbConnection()
@@ -51,6 +49,7 @@ namespace Lexicotron.Database
                 con.Execute("CREATE TABLE IF NOT EXISTS `word` (" +
                      "`wordid` INTEGER PRIMARY KEY NOT NULL, " +
                      "`word` TEXT UNIQUE NULL, " +
+                     "`senseId` TEXT UNIQUE NULL, " +
                      "`synsetId` TEXT UNIQUE NULL, " +
                      "`creationDate` TEXT NULL)");
                 con.Execute("CREATE INDEX idx_word ON `word`(`word`) ");
@@ -108,7 +107,6 @@ namespace Lexicotron.Database
             }
             return false;
         }
-
 
         public bool TryGetWords(IEnumerable<IWord> words, out IEnumerable<DbWord> outdbWords)
         {
@@ -287,7 +285,6 @@ namespace Lexicotron.Database
                 });   
             }
             return true;
-
         }
         public int GetTodayBabelRequestsCount()
         {
@@ -305,7 +302,6 @@ namespace Lexicotron.Database
                     "FROM `babellog` " +
                     "WHERE date(`requestDateTime`) = date(@dateSelected) " +
                     "GROUP BY date(@dateSelected)";
-
                 return cnn.QueryFirstOrDefault<int>(sql, new
                 {
                     dateSelected= dateSelected.ToString("o")
@@ -325,6 +321,21 @@ namespace Lexicotron.Database
 
                 return cnn.QueryFirst<int>(sql);
             }
+        }
+
+        public void UpdateOrAddWordsWithSynset(List<DbWord> dbwordToUpdate)
+        {
+            //get words that are already into the database
+            if(TryGetWords(dbwordToUpdate,out IEnumerable<DbWord> dbwordalreadyindb))
+            {
+                var wordalreadyindb = dbwordalreadyindb.ToHashSet();
+
+                //match synset
+
+                //wordalreadyindb.
+            }
+            //split dbwordto update : the words already in must be updated, the other must be added
+            throw new NotImplementedException();
         }
     }
 }
