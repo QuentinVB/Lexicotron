@@ -93,23 +93,24 @@ namespace Lexicotron.UI
 
             LocalWordDB database = new LocalWordDB();
             BabelAPICore babelAPI = new BabelAPICore(apikey,database);
-
-            int senses = 100;
-            Console.WriteLine("{0} sense to retrieve", senses);
+            Console.WriteLine("{0} remaining request for today : {1} ",database.GetTodayBabelRequestsCount(),DateTime.Today.ToString());
+            
+            int senses = 1;
+            Console.WriteLine("try to retrieve {0} senses", senses);
             Console.WriteLine("Asking babel...");
-            var wordsenses = babelAPI.RetrieveWordSense(senses);
+            var wordsenses = babelAPI.RetrieveWordSenses(senses);
 
             //convert words from Sense to DbWord list and log : SOLID VIOLATION !
             HashSet<DbWord> dbwordToUpdate = babelAPI.ParseBabelSenseToDbWord(wordsenses);
-            Console.WriteLine("{0} word to update or insert in the database", dbwordToUpdate.Count);
+            Console.WriteLine("Recieved {0} words to update or insert in the database", dbwordToUpdate.Count);
 
             //TODO : insert retrieved synset into database
             var results = database.UpdateOrAddWordsWithSynset(dbwordToUpdate);
             Console.WriteLine("{0} words inserted, {1} words updated", results.Item1, results.Item2);
             int totalWordCount = database.GetWordCount();
             int wordWithoutSynset = database.GetWordWithoutSynsetCount();
-            double stat = wordWithoutSynset  / totalWordCount * 100.0;
-            Console.WriteLine("{0} words in the database now, {1} are still without synset, {2}%", totalWordCount, wordWithoutSynset, stat);
+            double stat = Math.Round((1-((double)wordWithoutSynset  / (double)totalWordCount))*100.0,2);
+            Console.WriteLine("{0} words in the database now, {1} are still without synset, {2}% réalisé", totalWordCount, wordWithoutSynset, stat);
         }
 
         private static async Task loadRessources(Core.Lexicotron lexicotron)

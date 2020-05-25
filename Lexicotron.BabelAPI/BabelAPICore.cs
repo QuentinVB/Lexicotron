@@ -44,18 +44,18 @@ namespace Lexicotron.BabelAPI
             //TODO : url forge (using string builder + param)
         }
         //IEnumerable<IWord> words
-        public List<(BabelLog, List<BabelSense>)> RetrieveWordSense(int limit)
+        public List<(BabelLog, List<BabelSense>)> RetrieveWordSenses(int limit)
         {
             int requestsAvailable = Database.RequestsAvailable();
 
             List<DbWord> wordswithoutsynset = Database.GetWordsWithoutSynset(Math.Min(requestsAvailable,limit)).ToList();
 
-            List<(BabelLog, List<BabelSense>)> results = ResolveRequests(wordswithoutsynset).Result.ToList();
+            List<(BabelLog, List<BabelSense>)> results = ResolveSensesRequests(wordswithoutsynset).Result.ToList();
 
             return results;
         }
         
-        private async Task<IEnumerable<(BabelLog, List<BabelSense>)>> ResolveRequests(List<DbWord> words)
+        private async Task<IEnumerable<(BabelLog, List<BabelSense>)>> ResolveSensesRequests(List<DbWord> words)
         {
             List<Task<(BabelLog, List<BabelSense>)>> listOfTasks = new List<Task<(BabelLog, List<BabelSense>)>>();
             try
@@ -103,6 +103,14 @@ namespace Lexicotron.BabelAPI
                 {
                     Word = item.Item1.RequestedSynset,
                 };
+                if (item.Item2.Count==0)
+                {
+                    requestedInitialy.SynsetId = "none";
+                    requestedInitialy.SenseId = "none";
+                    dbWords.Add(requestedInitialy);
+                    continue;
+                }
+                
 
                 dbWords.Add(requestedInitialy);
 
@@ -115,6 +123,9 @@ namespace Lexicotron.BabelAPI
                 foreach(BabelSense babelSense in item.Item2)
                 {
                     if (babelSense.Properties.FullLemma.Contains("_")) continue;
+                    if (babelSense.Properties.FullLemma.Contains("(")) continue;
+                    if (babelSense.Properties.FullLemma.Contains(")")) continue;
+                    if (babelSense.Properties.FullLemma.Any(char.IsDigit)) continue;
                     else if (babelSense.Properties.Language != "FR") continue;
                     else if(
                         babelSense.Properties.Pos.Contains("NOUN")

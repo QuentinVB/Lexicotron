@@ -412,8 +412,8 @@ namespace Lexicotron.Database
                 }
             }
             //update
-            int wordupdated = TryUpdateDbWords(dbwordToUpdate);
-            int wordsinserted = TryAddWords(wordToAddInDb,false);
+            int wordupdated = (dbwordToUpdate.Count > 0) ? TryUpdateDbWords(dbwordToUpdate):0;           
+            int wordsinserted = (wordToAddInDb.Count > 0)? TryAddWords(wordToAddInDb,false):0;
             return (wordsinserted,wordupdated);
         }
 
