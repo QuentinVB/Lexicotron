@@ -17,7 +17,7 @@ namespace Lexicotron.BabelAPI.Models
         [JsonProperty("pointer")]
         public Pointer Pointer { get; set; }
 
-        [JsonProperty("target")]
+        [JsonProperty("target")]//synset
         public string Target { get; set; }
 
         [JsonProperty("weight")]
@@ -39,9 +39,35 @@ namespace Lexicotron.BabelAPI.Models
         public string ShortName { get; set; }
 
         [JsonProperty("relationGroup")]
+        /* 
+            HYPERNYM
+            OTHER
+            HOLONYM
+            HYPONYM
+        */
         public string RelationGroup { get; set; }
 
         [JsonProperty("isAutomatic")]
         public bool IsAutomatic { get; set; }
     }
 }
+/*
+ {
+        "language": "EN",
+        "pointer": {
+            "fSymbol": "+",
+            "name": "Derivationally related form",
+            "shortName": "deriv",
+            "relationGroup": "OTHER",
+            "isAutomatic": false
+        },
+        "target": "bn:00059674n",
+        "weight": 0.0,
+        "normalizedWeight": 0.0
+    },
+ relationGroup:
+ HYPERNYM
+OTHER
+HOLONYM
+HYPONYM
+ */

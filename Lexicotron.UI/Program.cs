@@ -95,7 +95,7 @@ namespace Lexicotron.UI
             BabelAPICore babelAPI = new BabelAPICore(apikey,database);
             Console.WriteLine("{0} remaining request for today : {1} ",database.GetTodayBabelRequestsCount(),DateTime.Today.ToString());
             
-            int senses = 1;
+            int senses = 100;
             Console.WriteLine("try to retrieve {0} senses", senses);
             Console.WriteLine("Asking babel...");
             var wordsenses = babelAPI.RetrieveWordSenses(senses);
@@ -109,8 +109,12 @@ namespace Lexicotron.UI
             Console.WriteLine("{0} words inserted, {1} words updated", results.Item1, results.Item2);
             int totalWordCount = database.GetWordCount();
             int wordWithoutSynset = database.GetWordWithoutSynsetCount();
+            int wordsDone = totalWordCount - wordWithoutSynset;
             double stat = Math.Round((1-((double)wordWithoutSynset  / (double)totalWordCount))*100.0,2);
-            Console.WriteLine("{0} words in the database now, {1} are still without synset, {2}% réalisé", totalWordCount, wordWithoutSynset, stat);
+            int goal = 3924;
+            int goalNotCompleted = database.GetWordsNotCompletedCount(goal);
+            double goalRatio = Math.Round((1 - ((double)goalNotCompleted / (double)goal)) * 100.0,2);
+            Console.WriteLine($"Words with synset in database : {wordsDone}/{totalWordCount} ({stat}% completed), {wordWithoutSynset} left. Goal: {goal-goalNotCompleted}/{goal} ({goalRatio}%)");
         }
 
         private static async Task loadRessources(Core.Lexicotron lexicotron)

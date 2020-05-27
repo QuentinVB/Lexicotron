@@ -11,114 +11,48 @@ using Lexicotron.Database.Models;
 
 namespace Lexicotron.Database
 {
-    //YYYY-MM-DD HH:MM:SS.SSS is sqlite time format
-    public class LocalWordDB
+    public partial class LocalWordDB
     {
-        HashSet<string> _synsetIdToSearch;
-
-        //TODO : change db DAL to singleton
-        public LocalWordDB()
-        {
-            _synsetIdToSearch = new HashSet<string>();
-            if (!File.Exists(DbFile)) CreateDatabase();
-
-        }
-        public static string DbFile
-        {
-            get { return Environment.CurrentDirectory + "\\wordDb.sqlite"; }
-        }
-
-        public HashSet<string> SynsetIdToSearch { get => _synsetIdToSearch; }
-
-        public static SQLiteConnection SimpleDbConnection()
-        {
-            return new SQLiteConnection("Data Source=" + DbFile);
-        }
-
-        //NOTE : SQLITE RowID is NOT 0 based !
-
-        public void CreateDatabase()
-        {
-            using (var con = SimpleDbConnection())
-            {
-                con.Open();
-
-                //words
-                con.Execute("PRAGMA foreign_keys = ON");
-                con.Execute("DROP TABLE IF EXISTS `word`");
-                con.Execute("CREATE TABLE IF NOT EXISTS `word` (" +
-                     "`wordid` INTEGER PRIMARY KEY NOT NULL, " +
-                     "`word` TEXT UNIQUE NULL, " +
-                     "`senseId` TEXT UNIQUE NULL, " +
-                     "`synsetId` TEXT NULL, " +
-                     "`creationDate` TEXT NULL)");
-                con.Execute("CREATE INDEX idx_word ON `word`(`word`) ");
-
-                //relations
-                con.Execute("DROP TABLE IF EXISTS `relation`");
-
-                con.Execute("CREATE TABLE IF NOT EXISTS `relation` (" +
-                    "`relationid` INTEGER PRIMARY KEY NOT NULL, " +
-                    "`wordSourceid` INT NOT NULL, " +
-                    "`relationGroup` TEXT NOT NULL, " +
-                    "`targetSynsetid` TEXT NOT NULL, " +
-                    "`wordTargetid` INT NULL, " +
-                    "`creationDate` TEXT NULL, " +
-                    "FOREIGN KEY(wordSourceid) REFERENCES word(wordid) ON DELETE SET NULL ON UPDATE CASCADE," +
-                    "FOREIGN KEY(wordTargetid) REFERENCES word(wordid) ON DELETE SET NULL ON UPDATE CASCADE)");
-
-                //relations
-                con.Execute("DROP TABLE IF EXISTS `babellog`");
-
-                con.Execute("CREATE TABLE IF NOT EXISTS `babellog` (" +
-                    "`id` INTEGER PRIMARY KEY NOT NULL, " +
-                    "`requestDateTime` TEXT NOT NULL, " +
-                    "`synsetRequested` TEXT NOT NULL, " +
-                    "`jsonReturned` TEXT NOT NULL )");
-            }
-        }
-
-
-        public void DeleteDatabase()
-        {
-            File.Delete(DbFile);
-        }
-
-
+        //TODO : split into 2 methods instead of selector calling the sub method
+        /// <summary>
+        /// Try to get a single word from the database using a selector
+        /// </summary>
+        /// <param name="selector">a word or a synset</param>
+        /// <param name="dbWord">a dbword passed to/by the caller by reference</param>
+        /// <param name="fromSynset">selector mode, if true the selector must be a synset</param>
+        /// <returns>True if the word was found, else false</returns>
         public bool TryGetWord(string selector, out DbWord dbWord, bool fromSynset = false)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
             if (string.IsNullOrWhiteSpace(selector)) throw new ArgumentNullException(nameof(selector));
-            
+
             dbWord = new DbWord();
 
             using (SQLiteConnection cnn = SimpleDbConnection())
             {
                 cnn.Open();
-                string sql = "SELECT * FROM `word` WHERE" + (fromSynset?"`synsetId` = @selector": "`word` = @selector")+";";
+                string sql = "SELECT * FROM `word` WHERE" + (fromSynset ? "`synsetId` = @selector" : "`word` = @selector") + ";";
 
                 var wordData = cnn.Query<DbWord>(sql, new { Selector = selector });
 
-                if(wordData.Count() > 0)
+                if (wordData.Count() > 0)
                 {
                     dbWord = wordData.First();
                     return true;
-                } 
+                }
             }
             return false;
         }
-        public static IEnumerable<List<T>> SplitList<T>(List<T> locations, int nSize = 30)
-        {
-            for (int i = 0; i < locations.Count; i += nSize)
-            {
-                yield return locations.GetRange(i, Math.Min(nSize, locations.Count - i));
-            }
-        }
-
+        /// <summary>
+        /// try to get words from the database using an enumerable of <see cref="IWord"/>
+        /// </summary>
+        /// <param name="words">the words to find</param>
+        /// <param name="outdbWords">a dbword enumerable passed to/by the caller by reference</param>
+        /// <returns></returns>
         public bool TryGetWords(IEnumerable<IWord> words, out IEnumerable<DbWord> outdbWords)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
-            if (words.Count()==0) throw new InvalidDataException(nameof(words));
+            if (words.Count() == 0) throw new InvalidDataException(nameof(words));
 
             IEnumerable<DbWord> FindWords(IEnumerable<IWord> wordsToFind)
             {
@@ -132,8 +66,9 @@ namespace Lexicotron.Database
             }
 
             //max words should be 999 according to SQLITE_MAX_VARIABLE_NUMBER https://www.sqlite.org/limits.html
+            //this little trick split the request into n sub requests if necessary
             int maxArgs = 900;
-            if (words.Count()> maxArgs)
+            if (words.Count() > maxArgs)
             {
                 IEnumerable<List<IWord>> lots = SplitList(words.ToList(), maxArgs);
                 List<DbWord> concatenedLots = new List<DbWord>();
@@ -151,9 +86,9 @@ namespace Lexicotron.Database
                 return true;
             }
 
-            
 
-            
+
+
         }
 
         public int TryGetWordsWithoutSynset(int amount, out IEnumerable<DbWord> outdbWords)
@@ -171,11 +106,11 @@ namespace Lexicotron.Database
             }
         }
 
-        
-        public bool TryAddWord(string word,string synsetId)
+
+        public bool TryAddWord(string word, string synsetId)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
-            if (string.IsNullOrWhiteSpace(word) && string.IsNullOrWhiteSpace(synsetId)) throw new ArgumentNullException(nameof(word)+ nameof(synsetId));
+            if (string.IsNullOrWhiteSpace(word) && string.IsNullOrWhiteSpace(synsetId)) throw new ArgumentNullException(nameof(word) + nameof(synsetId));
 
             //transform word : to lower ?
 
@@ -191,7 +126,7 @@ namespace Lexicotron.Database
                 }
                 catch (SqlException ex)
                 {
-                    if (ex.Number == 2601 || ex.Number == 2627) 
+                    if (ex.Number == 2601 || ex.Number == 2627)
                     {
                         return false;
                     }
@@ -208,11 +143,11 @@ namespace Lexicotron.Database
         public int TryAddWords(IEnumerable<IWord> words, bool safe = true)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
-            if (words.Count()==0) throw new InvalidOperationException(nameof(words)+" is empty");
+            if (words.Count() == 0) throw new InvalidOperationException(nameof(words) + " is empty");
 
             //TODO : Move the operation to the database
             //TODO : Add precheck to avoid double
-            if(safe)
+            if (safe)
             {
                 if (TryGetWords(words, out IEnumerable<DbWord> wordsFound))
                 {
@@ -220,12 +155,6 @@ namespace Lexicotron.Database
                     if (words.Count() == 0) return 0;
                 }
             }
-            
-
-            //TODO : Cast IWord from DbWord to get synset
-
-            //TODO : transform word : to lower ?
-
             using (SQLiteConnection cnn = SimpleDbConnection())
             {
                 cnn.Open();
@@ -233,7 +162,21 @@ namespace Lexicotron.Database
                 {
                     try
                     {
-                        string sql = "INSERT INTO `word` (`word`, `synsetId`, `creationDate` ) VALUES( @Word,null,date('now'));";
+                        //TODO : Cast IWord from DbWord to get synset
+
+                        string sql = "";
+                        if (words.FirstOrDefault() is DbWord)
+                        {
+                            sql = "INSERT INTO `word` (`word`, `synsetId`, `creationDate` ) VALUES( @Word,@SynsetId,date('now'));";
+
+                        }
+                        else
+                        {
+                            sql = "INSERT INTO `word` (`word`, `synsetId`, `creationDate` ) VALUES( @Word,null,date('now'));";
+
+                        }
+
+
                         int affectedRows = cnn.Execute(sql, words, transaction: transaction);
 
                         transaction.Commit();
@@ -246,7 +189,7 @@ namespace Lexicotron.Database
                     {
                         // roll the transaction back
                         if (ex is SqlException sqlex)
-                        { 
+                        {
                             if (sqlex.Number == 2601 || sqlex.Number == 2627)
                             {
                                 return 0;
@@ -257,99 +200,6 @@ namespace Lexicotron.Database
                         throw;
                     }
                 }
-            }
-        }
-        public bool TryAddRelation(string wordSource, string synsetTargetId,string relationGroup)
-        {
-            if (!TryGetWord(wordSource, out DbWord dbwordsource)) throw new InvalidOperationException();
-            if(!TryGetWord(synsetTargetId, out DbWord dbwordtarget,true))
-            {
-                TryAddWord(null,synsetTargetId);
-                _synsetIdToSearch.Add(synsetTargetId);
-            }
-
-            DbRelation relation = new DbRelation()
-            {
-                WordSourceId = dbwordsource.Id,
-                WordSource = dbwordtarget,
-                RelationGroup = relationGroup,
-                TargetSynsetId = synsetTargetId,
-                WordTargetId = dbwordtarget.Id,
-                WordTarget = dbwordtarget
-            };
-            return TryAddRelation(relation);
-        }
-        public bool TryAddRelation(DbRelation relation)
-        {
-            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
-            if (relation.WordSourceId == null ||relation.RelationGroup==null || relation.TargetSynsetId == null) throw new ArgumentNullException();
-
-
-            using (SQLiteConnection cnn = SimpleDbConnection())
-            {
-                try
-                {
-                    //https://sql.sh/cours/insert-into
-                    string sql = "INSERT INTO `relation` (`wordSourceid`,`relationGroup`,`targetSynsetid`, `wordTargetid`,`creationDate` ) VALUES(@WordSourceId, @RelationGroup,@TargetSynsetId,@WordTargetId,date('now', 'localtime'));";
-
-                    cnn.Query<DbWord>(sql, new {
-                        relation.WordSourceId,
-                        relation.RelationGroup,
-                        relation.TargetSynsetId,
-                        relation.WordTargetId
-                    });
-                    return true;
-                }
-                catch (SqlException ex)
-                {
-                    if (ex.Number == 2601 || ex.Number == 2627)
-                    {
-                        return false;
-                    }
-                    throw;
-                }
-            }
-        }
-
-        public bool TryAddLog(string synsetRequested, string jsonReturned)
-        {
-            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
-            if (synsetRequested == null || jsonReturned == null) throw new ArgumentNullException();
-
-            using (SQLiteConnection cnn = SimpleDbConnection())
-            {           
-                //https://sql.sh/cours/insert-into
-                string sql = "INSERT INTO `babellog` (`requestDateTime`,`synsetRequested`,`jsonReturned` ) " +
-                    "VALUES(date('now', 'localtime'), @synsetRequested,@jsonReturned);";
-
-                cnn.Query(sql, new
-                {
-                    synsetRequested,
-                    jsonReturned
-                });   
-            }
-            return true;
-        }
-        public int GetTodayBabelRequestsCount()
-        {
-            return GetBabelRequestsCount(DateTime.Now);
-        }
-        public int GetBabelRequestsCount(DateTime dateSelected)
-        {
-            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
-            if (dateSelected == null ) throw new ArgumentNullException();
-
-            using (SQLiteConnection cnn = SimpleDbConnection())
-            {             
-                //https://sql.sh/cours/insert-into
-                string sql = "SELECT count(`requestDateTime`) as Count " +
-                    "FROM `babellog` " +
-                    "WHERE date(`requestDateTime`) = date(@dateSelected) " +
-                    "GROUP BY date(@dateSelected)";
-                return cnn.QueryFirstOrDefault<int>(sql, new
-                {
-                    dateSelected= dateSelected.ToString("o")
-                }) ;
             }
         }
 
@@ -378,16 +228,30 @@ namespace Lexicotron.Database
                 return cnn.QueryFirst<int>(sql);
             }
         }
+        public int GetWordsNotCompletedCount(int goal)
+        {
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                //https://sql.sh/cours/insert-into
+                string sql = "SELECT count(`wordid`) as Count " +
+                    "FROM (SELECT `wordid`,`word`,`synsetId` FROM `word` LIMIT @goal) " +
+                    "WHERE (`word` IS NOT NULL AND `synsetId` IS NULL ) ";
+
+                return cnn.QueryFirst<int>(sql,new {goal});
+            }
+        }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="dbwordToUpdateOrAdd">the words to update or add</param>
         /// <returns>a tuple with count of word inserted, then updated</returns>
-        public (int,int) UpdateOrAddWordsWithSynset(HashSet<DbWord> dbwordToUpdateOrAdd)
+        public (int, int) UpdateOrAddWordsWithSynset(HashSet<DbWord> dbwordToUpdateOrAdd)
         {
             HashSet<DbWord> wordAlreadyInDb;
-            HashSet<DbWord> wordToAddInDb= new HashSet<DbWord>();
-            HashSet<DbWord> dbwordToUpdate=new HashSet<DbWord>();
+            HashSet<DbWord> wordToAddInDb = new HashSet<DbWord>();
+            HashSet<DbWord> dbwordToUpdate = new HashSet<DbWord>();
 
             //get words that are already into the database
             if (TryGetWords(dbwordToUpdateOrAdd, out IEnumerable<DbWord> dbwordalreadyindb))
@@ -399,7 +263,7 @@ namespace Lexicotron.Database
                 foreach (DbWord word in dbwordToUpdateOrAdd)
                 {
                     //if word is already in db :  add to update
-                    if(wordAlreadyInDb.Contains(word))
+                    if (wordAlreadyInDb.Contains(word))
                     {
                         dbwordToUpdate.Add(word);
                     }
@@ -412,9 +276,9 @@ namespace Lexicotron.Database
                 }
             }
             //update
-            int wordupdated = (dbwordToUpdate.Count > 0) ? TryUpdateDbWords(dbwordToUpdate):0;           
-            int wordsinserted = (wordToAddInDb.Count > 0)? TryAddWords(wordToAddInDb,false):0;
-            return (wordsinserted,wordupdated);
+            int wordupdated = (dbwordToUpdate.Count > 0) ? TryUpdateDbWords(dbwordToUpdate) : 0;
+            int wordsinserted = (wordToAddInDb.Count > 0) ? TryAddWords(wordToAddInDb, false) : 0;
+            return (wordsinserted, wordupdated);
         }
 
         public int TryUpdateDbWords(IEnumerable<DbWord> dbwordToUpdate)

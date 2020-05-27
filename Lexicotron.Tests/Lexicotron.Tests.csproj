@@ -55,7 +55,10 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestDB.cs" />
+    <Compile Include="TestsDB\TestDBRelation.cs" />
+    <Compile Include="TestsDB\TestDBLog.cs" />
+    <Compile Include="TestsDB\TestDBWord.cs" />
+    <Compile Include="TestsDB\TestDBGlobal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

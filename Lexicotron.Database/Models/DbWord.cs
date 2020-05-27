@@ -8,7 +8,7 @@ namespace Lexicotron.Database.Models
 {
     public class DbWord : IWord
     {
-        public int Id { get; set; }
+        public int WordId { get; set; }
         public string Word { get; set; }
         public string SynsetId { get; set; }
         public string SenseId { get; set; }
@@ -16,8 +16,8 @@ namespace Lexicotron.Database.Models
         Hypernym 
         Hyponym 
          */
-        public int HyperonymCount { get; set; }
-        public int HyponymCount { get; set; }
+        public int HyperonymCount { get; set; }//number of words wich are this words (above)
+        public int HyponymCount { get; set; } //number of words wich are a kind of this word (below)
         public DateTime CreationDate { get; set; }
 
 

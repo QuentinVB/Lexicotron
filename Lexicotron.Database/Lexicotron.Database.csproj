@@ -81,7 +81,10 @@
   <ItemGroup>
     <Compile Include="CsvLoader.cs" />
     <Compile Include="ExcelLoader.cs" />
-    <Compile Include="LocalWordDB.cs" />
+    <Compile Include="LocalWordDB_relation.cs" />
+    <Compile Include="LocalWordDB_log.cs" />
+    <Compile Include="LocalWordDB_main.cs" />
+    <Compile Include="LocalWordDB_word.cs" />
     <Compile Include="Models\BabelLog.cs" />
     <Compile Include="Models\DbRelation.cs" />
     <Compile Include="Models\DbWord.cs" />
