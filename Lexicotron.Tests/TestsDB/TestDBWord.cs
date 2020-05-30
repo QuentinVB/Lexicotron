@@ -373,6 +373,39 @@ namespace Lexicotron.Tests.TestsDB
             //restore
             sut.DeleteDatabase();
         }
+        [TestMethod]
+        public void TestUpdateWordsRelationStatus()
+        {
+            //arrange
+            LocalWordDB sut = new LocalWordDB();
+
+            sut.CreateDatabase();
+
+            List<DbWord> wordlist = new List<DbWord>
+            {
+
+                new DbWord { Word = "test", SynsetId = "b:fzf4687", CreationDate = DateTime.Today, WordId=1 },
+                new DbWord { Word = "test2", SynsetId = "b:vdqvqdv45", CreationDate = DateTime.Today, WordId=2  }
+            };
+
+            sut.TryAddWord(defaultDbWord.Word, defaultDbWord.SynsetId).Should().BeTrue();
+            sut.TryAddWord(defaultDbWord2.Word, defaultDbWord2.SynsetId).Should().BeTrue();
+
+            //act
+            sut.UpdateWordRelationStatus(wordlist,true).Should().Be(2);
+
+            //assert
+
+            sut.TryGetWords(wordlist, out IEnumerable<DbWord> outDbWords).Should().BeTrue();
+
+            outDbWords.Count().Should().Be(wordlist.Count);
+
+            outDbWords.Any(x=>x.RelationsRequested==true).Should().BeTrue();
+
+
+            //restore
+            sut.DeleteDatabase();
+        }
     }
 }
 

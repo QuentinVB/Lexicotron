@@ -105,7 +105,20 @@ namespace Lexicotron.Database
                 return outdbWords.Count();
             }
         }
+        public int TryGetWordsWithoutRelation(int amount, out IEnumerable<DbWord> wordsFound)
+        {
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
 
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                cnn.Open();
+                string sql = "SELECT * FROM `word` WHERE (`word` IS NOT NULL AND `relationsRequested` IS NULL AND `synsetId` <> 'none') LIMIT @amount;";
+
+                wordsFound = cnn.Query<DbWord>(sql, new { amount });
+
+                return wordsFound.Count();
+            }
+        }
 
         public bool TryAddWord(string word, string synsetId)
         {
@@ -242,6 +255,20 @@ namespace Lexicotron.Database
                 return cnn.QueryFirst<int>(sql,new {goal});
             }
         }
+        public int GetWordWithoutRelationCount(int goal)
+        {
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                //https://sql.sh/cours/insert-into
+                string sql = "SELECT count(`wordid`) as Count " +
+                    "FROM (SELECT `wordid`,`relationsRequested` FROM `word` LIMIT @goal) " +
+                    "WHERE `relationsRequested` IS NULL OR `relationsRequested` = 0 ";
+
+                return cnn.QueryFirst<int>(sql, new { goal });
+            }
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -286,6 +313,7 @@ namespace Lexicotron.Database
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
             if (dbwordToUpdate == null) throw new ArgumentNullException();
 
+
             using (SQLiteConnection cnn = SimpleDbConnection())
             {
                 cnn.Open();
@@ -317,6 +345,40 @@ namespace Lexicotron.Database
                         }
                         transaction.Rollback();
 
+                        throw;
+                    }
+                }
+            }
+        }
+        public int UpdateWordRelationStatus(IEnumerable<DbWord> words, bool status)
+        {
+
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+            if (words == null) throw new ArgumentNullException();
+            if (words.Any(x => x.WordId < 1)) throw new InvalidDataException("the word must have their id");
+
+
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    try
+                    {
+                        string sql = "UPDATE `word` SET " +
+                            "`relationsRequested` = " + (status ? "1" : "0") +
+                            " WHERE `wordid` = @WordId";
+                        int affectedRows = cnn.Execute(sql, words, transaction: transaction);
+
+                        transaction.Commit();
+
+                        if (affectedRows != words.Count()) throw new InvalidDataException();
+
+                        return affectedRows;
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
                         throw;
                     }
                 }

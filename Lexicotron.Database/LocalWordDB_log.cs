@@ -33,6 +33,9 @@ namespace Lexicotron.Database
             }
             return true;
         }
+
+        
+
         public int GetTodayBabelRequestsCount()
         {
             return GetBabelRequestsCount(DateTime.Now);
@@ -56,5 +59,6 @@ namespace Lexicotron.Database
             }
         }
 
+        
     }
 }

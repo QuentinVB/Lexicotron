@@ -30,6 +30,12 @@ namespace Lexicotron.BabelAPI
             return wordsFound;
         }
 
+        internal IEnumerable<DbWord> GetWordsWithoutRelation(int amount)
+        {
+            DAL.TryGetWordsWithoutRelation(amount, out IEnumerable<DbWord> wordsFound);
+            return wordsFound;
+        }
+
         internal int RequestsAvailable()
         {
             //TODO : put max request into const or config file

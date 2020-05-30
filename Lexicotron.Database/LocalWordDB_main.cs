@@ -70,9 +70,10 @@ namespace Lexicotron.Database
                      "`word` TEXT UNIQUE NULL, " +
                      "`senseId` TEXT UNIQUE NULL, " +
                      "`synsetId` TEXT NULL, " +
+                     "`relationsRequested` INT NULL, " +
                      "`creationDate` TEXT NULL)");
                 con.Execute("CREATE INDEX idx_word ON `word`(`word`) ");
-
+                
                 //relations
                 con.Execute("DROP TABLE IF EXISTS `relation`");
 

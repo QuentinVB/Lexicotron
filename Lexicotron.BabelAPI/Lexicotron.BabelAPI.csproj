@@ -47,7 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BabelAPICore.cs" />
+    <Compile Include="BabelAPICore_Senses.cs" />
+    <Compile Include="BabelAPICore_core.cs" />
+    <Compile Include="BabelAPICore_relations.cs" />
     <Compile Include="DALAPIAdapter.cs" />
     <Compile Include="Models\BabelEdge.cs" />
     <Compile Include="Models\BabelSense.cs" />

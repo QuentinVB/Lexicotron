@@ -12,6 +12,8 @@ namespace Lexicotron.UI
 {
     class Program
     {
+        readonly static int Goal = 3924;
+
         static void Main(string[] args)
         {
             string startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
@@ -23,7 +25,8 @@ namespace Lexicotron.UI
             {
                 Console.WriteLine("Choose mode :");
                 Console.WriteLine(" 1. Explore articles words from \"input\" folder");
-                Console.WriteLine(" 2. Try retrive data from babel");
+                Console.WriteLine(" 2. Try retrive word data from babel");
+                Console.WriteLine(" 3. Try retrieve relation data from babel");
                 Console.WriteLine(("").PadRight(44, '-'));
             } while (!Int32.TryParse(Console.ReadLine(), out number));
 
@@ -34,9 +37,14 @@ namespace Lexicotron.UI
                     ExploreMode(startTimestamp);
                     break;
                 case 2:
-                    Console.WriteLine("Retrive Mode");
+                    Console.WriteLine("Retrive Words Mode");
 
-                    RetriveDataMode(startTimestamp);
+                    RetriveWordMode(startTimestamp);
+                    break;
+                case 3:
+                    Console.WriteLine("Retrive Relations Mode");
+
+                    RetriveRelationsMode(startTimestamp);
                     break;
                 default:
                     break;
@@ -78,7 +86,7 @@ namespace Lexicotron.UI
 
         }
 
-        private static void RetriveDataMode(string startTimestamp)
+        private static void RetriveWordMode(string startTimestamp)
         {
             Console.WriteLine("Here be dragonz");
             string apikey;
@@ -95,26 +103,78 @@ namespace Lexicotron.UI
             BabelAPICore babelAPI = new BabelAPICore(apikey,database);
             Console.WriteLine("{0} remaining request for today : {1} ",database.GetTodayBabelRequestsCount(),DateTime.Today.ToString());
             
-            int senses = 100;
-            Console.WriteLine("try to retrieve {0} senses", senses);
+            int amount = 100;
+            Console.WriteLine("try to retrieve {0} senses", amount);
             Console.WriteLine("Asking babel...");
-            var wordsenses = babelAPI.RetrieveWordSenses(senses);
+            var wordsenses = babelAPI.RetrieveWordSenses(amount);
 
             //convert words from Sense to DbWord list and log : SOLID VIOLATION !
             HashSet<DbWord> dbwordToUpdate = babelAPI.ParseBabelSenseToDbWord(wordsenses);
             Console.WriteLine("Recieved {0} words to update or insert in the database", dbwordToUpdate.Count);
 
-            //TODO : insert retrieved synset into database
+            //insert retrieved synset into database
             var results = database.UpdateOrAddWordsWithSynset(dbwordToUpdate);
             Console.WriteLine("{0} words inserted, {1} words updated", results.Item1, results.Item2);
             int totalWordCount = database.GetWordCount();
             int wordWithoutSynset = database.GetWordWithoutSynsetCount();
             int wordsDone = totalWordCount - wordWithoutSynset;
             double stat = Math.Round((1-((double)wordWithoutSynset  / (double)totalWordCount))*100.0,2);
+            int goalNotCompleted = database.GetWordsNotCompletedCount(Goal);
+            double goalRatio = Math.Round((1 - ((double)goalNotCompleted / (double)Goal)) * 100.0,2);
+            Console.WriteLine($"Words with synset in database : {wordsDone}/{totalWordCount} ({stat}% completed), {wordWithoutSynset} left. \nGoal: {Goal-goalNotCompleted}/{Goal} ({goalRatio}%)");
+        }
+        private static void RetriveRelationsMode(string startTimestamp)
+        {
+            Console.WriteLine("Here be dragonz again");
+            string apikey;
+            try
+            {
+                apikey = System.IO.File.ReadAllText(Helpers.GetExecutingDirectoryPath() + @"\babel.apikey");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            LocalWordDB database = new LocalWordDB();
+            BabelAPICore babelAPI = new BabelAPICore(apikey, database);
+            Console.WriteLine("{0} remaining request for today : {1} ", database.GetTodayBabelRequestsCount(), DateTime.Today.ToString());
+
+            int amount = 100;
+            Console.WriteLine("try to retrieve {0} relations", amount);
+            Console.WriteLine("Asking babel...");
+            var relations = babelAPI.RetrieveRelations(amount);
+            Console.WriteLine($"{relations.Count()} responses");
+
+            //convert words from BabelRelation to DbRelation list and log : SOLID VIOLATION !           
+            HashSet<DbRelation> dbRelationToUpdate = babelAPI.ParseBabelRelationsToDbRelation(relations);
+            Console.WriteLine("Recieved {0} relations to update or insert in the database", dbRelationToUpdate.Count);
+
+
+            //TODO : insert retrieved relations into database and update the word to said they have relations now
+            var results = database.TryAddRelations(dbRelationToUpdate);
+            Console.WriteLine("{0} relations inserted", results);
+
+            int wordsWithRelationUpdated = database.UpdateWordRelationStatus(relations.Select(x=>x.Item2), true);
+            
+            int totalWordCount = database.GetWordCount();
+            double stat = Math.Round((1 - ((double)wordsWithRelationUpdated / (double)totalWordCount)) * 100.0, 2);
+
+            int goalNotCompleted = database.GetWordWithoutRelationCount(Goal);
+            double goalRatio = Math.Round((1 - ((double)goalNotCompleted / (double)Goal)) * 100.0, 2);
+
+            Console.WriteLine($"Words with relations : {wordsWithRelationUpdated}/{totalWordCount} ({stat}% completed). \n" +
+                $"Goal: {Goal - goalNotCompleted}/{Goal} ({goalRatio}%)");
+
+
+            /*
+            int wordWithoutSynset = database.GetWordWithoutSynsetCount();
+            int wordsDone = totalWordCount - wordWithoutSynset;
+            double stat = Math.Round((1 - ((double)wordWithoutSynset / (double)totalWordCount)) * 100.0, 2);
             int goal = 3924;
             int goalNotCompleted = database.GetWordsNotCompletedCount(goal);
-            double goalRatio = Math.Round((1 - ((double)goalNotCompleted / (double)goal)) * 100.0,2);
-            Console.WriteLine($"Words with synset in database : {wordsDone}/{totalWordCount} ({stat}% completed), {wordWithoutSynset} left. Goal: {goal-goalNotCompleted}/{goal} ({goalRatio}%)");
+            Console.WriteLine($"Words with synset in database : {wordsDone}/{totalWordCount} ({stat}% completed), {wordWithoutSynset} left. Goal: {goal - goalNotCompleted}/{goal} ({goalRatio}%)");
+            */
         }
 
         private static async Task loadRessources(Core.Lexicotron lexicotron)

@@ -66,6 +66,45 @@ namespace Lexicotron.Database
                 }
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="words">the enumeration of relations to insert</param>
+        /// <returns>Nomber of rows inserted</returns>
+        public int TryAddRelations(IEnumerable<DbRelation> relations)
+        {
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+            if (relations.Count() == 0) throw new InvalidOperationException(nameof(relations) + " is empty");
+
+           
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    try
+                    {
+                        //TODO : Cast IWord from DbWord to get synset
+
+                        string sql = "INSERT INTO `relation` (`wordSourceid`,`relationGroup`,`targetSynsetid`, `wordTargetid`,`creationDate` ) " +
+                            "VALUES(@WordSourceId, @RelationGroup,@TargetSynsetId,@WordTargetId,date('now', 'localtime'));";
+
+                        int affectedRows = cnn.Execute(sql, relations, transaction: transaction);
+
+                        transaction.Commit();
+
+                        if (affectedRows != relations.Count()) throw new InvalidDataException();
+
+                        return affectedRows;
+                    }
+                    catch 
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
         public bool TryGetRelationCount(DbWord word)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
@@ -78,7 +117,7 @@ namespace Lexicotron.Database
                     //https://sql.sh/cours/insert-into
                     string sql = "SELECT w.wordid, w.word, w.synsetId, w.creationDate, r.hyperonymCount FROM `word` AS w " +
                         "INNER JOIN" +
-                        "(SELECT `wordSource`, count(`relationid`) as hyperonymCount FROM `relation` WHERE `relationGroup` = 'hyperonym') as r" +
+                        "(SELECT `wordSource`, count(`relationid`) as hyperonymCount FROM `relation` WHERE `relationGroup` = 'hypernym') as r" +
                         "ON w.wordid = r.wordSource" +
                         "WHERE `word` = @Word";//da big request ever
 
@@ -95,6 +134,8 @@ namespace Lexicotron.Database
                 }
             }
         }
+
+        
 
     }
 }
