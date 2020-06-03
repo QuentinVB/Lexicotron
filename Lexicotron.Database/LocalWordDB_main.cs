@@ -88,6 +88,7 @@ namespace Lexicotron.Database
                     "PRIMARY KEY(`relationid`)," +
                     "FOREIGN KEY(`wordSourceid`) REFERENCES word(`wordid`) ON DELETE CASCADE ON UPDATE CASCADE," +
                     "FOREIGN KEY(`wordTargetid`) REFERENCES word(`wordid`) ON DELETE SET NULL ON UPDATE CASCADE)");
+                con.Execute("CREATE INDEX idx_wordSourceid ON `relation`(`wordSourceid`) ");
 
                 //log
                 con.Execute("DROP TABLE IF EXISTS `babellog`");

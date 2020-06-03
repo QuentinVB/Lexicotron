@@ -79,9 +79,12 @@ namespace Lexicotron.Tests.TestsDB
             sut.TryAddRelation(defaultRelation).Should().BeTrue();
 
             //act-assert
-            var wordreturned = sut.TryGetRelationCount(defaultDbWord);
+            var wordreturned = sut.TryGetRelationsSum(defaultDbWord);
             wordreturned.Word.Should().Be(defaultDbWord.Word);
             wordreturned.HyperonymCount.Should().Be(1);
+            wordreturned.HyponymCount.Should().Be(0);
+            wordreturned.OtherCount.Should().Be(0);
+
             //no hyponym !!!
 
             //restore
@@ -98,9 +101,12 @@ namespace Lexicotron.Tests.TestsDB
             sut.TryAddWord(defaultDbWord.Word, defaultDbWord.SynsetId).Should().BeTrue();
 
             //act-assert
-            var wordreturned = sut.TryGetRelationCount(defaultDbWord);
+            var wordreturned = sut.TryGetRelationsSum(defaultDbWord);
             wordreturned.Word.Should().Be(defaultDbWord.Word);
             wordreturned.HyperonymCount.Should().Be(0);
+            wordreturned.HyponymCount.Should().Be(0);
+            wordreturned.OtherCount.Should().Be(0);
+
             //no hyponym !!!
 
             //restore

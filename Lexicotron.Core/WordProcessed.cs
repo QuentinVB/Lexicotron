@@ -53,9 +53,18 @@ namespace Lexicotron.Core
         /// </summary>
         [NonPrintable]
         public HashSet<string> LexicalFieldCollection { get; set; }
-
-        /*HyponymCount, HyperonymCount
-         */
+        /// <summary>
+        /// number of words wich are this words (above)
+        /// </summary>
+        public int HyperonymCount { get; set; }
+        /// <summary>
+        /// number of words wich are a kind of this word (below)
+        /// </summary>
+        public int HyponymCount { get; set; } 
+        /// <summary>
+        /// number of other relation with this word
+        /// </summary>
+        public int OtherCount { get; set; }
 
         public bool Equals(IWord other)
         {

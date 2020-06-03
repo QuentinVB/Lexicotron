@@ -31,5 +31,15 @@ namespace Lexicotron.Core
         {
             return DAL.GetWordCount();           
         }
+
+        //TODO : make a better proxy... the memory is awful here
+        internal WordProcessed GetRelationCount(WordProcessed word)
+        {
+            DbWord returnedDbWord = DAL.TryGetRelationsSum(new DbWord() { Word = word.Word });
+            word.HyperonymCount = returnedDbWord.HyperonymCount;
+            word.HyponymCount = returnedDbWord.HyponymCount;
+            word.OtherCount = returnedDbWord.OtherCount;
+            return word;
+        }
     }
 }

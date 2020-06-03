@@ -27,6 +27,7 @@ namespace Lexicotron.UI
                 Console.WriteLine(" 1. Explore articles words from \"input\" folder");
                 Console.WriteLine(" 2. Try retrive word data from babel");
                 Console.WriteLine(" 3. Try retrieve relation data from babel");
+                //4. generate lexical field frequency from lexical field and lexicon
                 Console.WriteLine(("").PadRight(44, '-'));
             } while (!Int32.TryParse(Console.ReadLine(), out number));
 
@@ -38,12 +39,10 @@ namespace Lexicotron.UI
                     break;
                 case 2:
                     Console.WriteLine("Retrive Words Mode");
-
                     RetriveWordMode(startTimestamp);
                     break;
                 case 3:
                     Console.WriteLine("Retrive Relations Mode");
-
                     RetriveRelationsMode(startTimestamp);
                     break;
                 default:

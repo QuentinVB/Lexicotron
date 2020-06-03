@@ -14,13 +14,13 @@ namespace Lexicotron.Database
     //YYYY-MM-DD HH:MM:SS.SSS is sqlite time format
     public partial class LocalWordDB
     {
-        
-        public bool TryAddRelation(string wordSource, string synsetTargetId,string relationGroup)
+
+        public bool TryAddRelation(string wordSource, string synsetTargetId, string relationGroup)
         {
             if (!TryGetWord(wordSource, out DbWord dbwordsource)) throw new InvalidOperationException();
-            if(!TryGetWord(synsetTargetId, out DbWord dbwordtarget,true))
+            if (!TryGetWord(synsetTargetId, out DbWord dbwordtarget, true))
             {
-                TryAddWord(null,synsetTargetId);
+                TryAddWord(null, synsetTargetId);
                 _synsetIdToSearch.Add(synsetTargetId);
             }
 
@@ -38,7 +38,7 @@ namespace Lexicotron.Database
         public bool TryAddRelation(DbRelation relation)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
-            if (relation.WordSourceId == null ||relation.RelationGroup==null || relation.TargetSynsetId == null) throw new ArgumentNullException();
+            if (relation.WordSourceId == null || relation.RelationGroup == null || relation.TargetSynsetId == null) throw new ArgumentNullException();
 
 
             using (SQLiteConnection cnn = SimpleDbConnection())
@@ -48,7 +48,8 @@ namespace Lexicotron.Database
                     //https://sql.sh/cours/insert-into
                     string sql = "INSERT INTO `relation` (`wordSourceid`,`relationGroup`,`targetSynsetid`, `wordTargetid`,`creationDate` ) VALUES(@WordSourceId, @RelationGroup,@TargetSynsetId,@WordTargetId,date('now', 'localtime'));";
 
-                    cnn.Query<DbWord>(sql, new {
+                    cnn.Query<DbWord>(sql, new
+                    {
                         relation.WordSourceId,
                         relation.RelationGroup,
                         relation.TargetSynsetId,
@@ -76,7 +77,7 @@ namespace Lexicotron.Database
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
             if (relations.Count() == 0) throw new InvalidOperationException(nameof(relations) + " is empty");
 
-           
+
             using (SQLiteConnection cnn = SimpleDbConnection())
             {
                 cnn.Open();
@@ -97,7 +98,7 @@ namespace Lexicotron.Database
 
                         return affectedRows;
                     }
-                    catch 
+                    catch
                     {
                         transaction.Rollback();
                         throw;
@@ -105,26 +106,42 @@ namespace Lexicotron.Database
                 }
             }
         }
-        public DbWord TryGetRelationCount(DbWord word)
+
+        private class RelationCount
+        {
+            public string WordSourceid { get; set; }
+            public string RelationGroup { get; set; }
+            public int Count { get; set; }
+
+        }
+        public DbWord TryGetRelationsSum(DbWord word)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
             if (word.Word == null) throw new ArgumentNullException();
+
+
 
             using (SQLiteConnection cnn = SimpleDbConnection())
             {
                 try
                 {
                     //https://sql.sh/cours/insert-into
-                    string sql = "SELECT w.wordid, w.word, w.synsetId, w.creationDate, r.hyperonymCount FROM `word` AS w " +
-                        "INNER JOIN" +
-                        "(SELECT `wordSourceid`, count(`relationid`) as hyperonymCount FROM `relation` WHERE `relationGroup` = 'hypernym') AS r " +
-                        "ON w.wordid = r.wordSourceid " +
-                        "WHERE `word` = @Word";//da big request ever
+                    string sql = "SELECT `wordSourceid`,`relationGroup`, count(`relationid`) as `count` FROM `relation` " +
+                        "WHERE wordSourceid IN (SELECT wordid FROM `word` WHERE `word` = @Word) " +
+                        "GROUP BY `relationGroup`";//da big request ever
 
-                    DbWord returnedWord = cnn.QueryFirstOrDefault<DbWord>(sql, word);
+                    IEnumerable<RelationCount> returnedRelationsCount = cnn.Query<RelationCount>(sql, word);
 
-                    if (returnedWord ==null || returnedWord.Word != word.Word) return word;
-                    return returnedWord;
+                    if (returnedRelationsCount.Count() == 0) return word;
+
+                    foreach (RelationCount relationCount in returnedRelationsCount)
+                    {
+                        if (relationCount.RelationGroup == "hypernym") { word.HyperonymCount = relationCount.Count; continue; }
+                        if (relationCount.RelationGroup == "hyponym") { word.HyponymCount = relationCount.Count; continue; }
+                        if (relationCount.RelationGroup == "other") { word.OtherCount = relationCount.Count; continue; }
+                    }
+
+                    return word;
                 }
                 catch (SqlException ex)
                 {
@@ -137,8 +154,50 @@ namespace Lexicotron.Database
                 }
             }
         }
+        /*
+        public IEnumerable<DbWord> TryGetRelationsCount(IEnumerable<DbWord> words)
+        {
+            if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
+            if (words.Count() == 0) throw new ArgumentNullException();
 
-        
+
+            using (SQLiteConnection cnn = SimpleDbConnection())
+            {
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    try
+                    {
+                        //TODO : Cast IWord from DbWord to get synset
+
+                        string sql = "SELECT `wordSourceid`,`relationGroup`, count(`relationid`) as `count` FROM `relation` " +
+                        "WHERE wordSourceid IN (SELECT wordid FROM `word` WHERE `word` = @Word) " +
+                        "GROUP BY `relationGroup`";//da big request ever
+
+                        IEnumerable <IEnumerable <RelationCount>> returnedRelationsCount = cnn.Query<IEnumerable<RelationCount>>(sql, words, transaction: transaction);
+
+                        transaction.Commit();
+
+                        if (returnedRelationsCount.Count() == 0) return words;
+
+                        words.
+
+                        //use linq to project relationcount data to original words
+                        //ha ha...lol
+
+
+
+                            }
+                            catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+        */
+
 
     }
 }

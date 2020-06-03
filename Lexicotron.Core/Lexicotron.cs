@@ -117,6 +117,8 @@ namespace Lexicotron.Core
                 Console.WriteLine(" | {0} words inserted in database", Database.InsertWords(article.Words.Values));
 
                 //match heterony/hyperonym
+                MatchRelation(article);
+
 
 
                 article.Words = article.Words.OrderByDescending(w => w.Value.Occurence).ToDictionary(x => x.Key, x => x.Value);
@@ -126,12 +128,18 @@ namespace Lexicotron.Core
             return _articles;
         }
 
-        private void SummarizeLexicalFields(Article article)
+        private void MatchRelation(Article article)
         {
+            foreach (WordProcessed word in article.Words.Values)
+            {
+                WordProcessed returnedWord = Database.GetRelationCount(word);
+                word.HyperonymCount = returnedWord.HyperonymCount;
+                word.HyponymCount = returnedWord.HyponymCount;
+                word.OtherCount = returnedWord.OtherCount;
+            }
         }
 
-
-
+      
         /*
 VER
 ADJ

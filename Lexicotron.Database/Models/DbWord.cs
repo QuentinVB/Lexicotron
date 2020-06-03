@@ -19,8 +19,9 @@ namespace Lexicotron.Database.Models
          */
         public int HyperonymCount { get; set; }//number of words wich are this words (above)
         public int HyponymCount { get; set; } //number of words wich are a kind of this word (below)
-        public DateTime CreationDate { get; set; }
+        public int OtherCount { get; set; }
 
+        public DateTime CreationDate { get; set; }
 
         public bool Equals(IWord other)
         {
