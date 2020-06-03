@@ -75,17 +75,19 @@ namespace Lexicotron.Database
                 con.Execute("CREATE INDEX idx_word ON `word`(`word`) ");
                 
                 //relations
+
                 con.Execute("DROP TABLE IF EXISTS `relation`");
 
                 con.Execute("CREATE TABLE IF NOT EXISTS `relation` (" +
-                    "`relationid` INTEGER PRIMARY KEY NOT NULL, " +
+                    "`relationid` INTEGER NOT NULL, " +
                     "`wordSourceid` INT NOT NULL, " +
                     "`relationGroup` TEXT NOT NULL, " +
                     "`targetSynsetid` TEXT NOT NULL, " +
                     "`wordTargetid` INT NULL, " +
                     "`creationDate` TEXT NULL, " +
-                    "FOREIGN KEY(wordSourceid) REFERENCES word(wordid) ON DELETE SET NULL ON UPDATE CASCADE," +
-                    "FOREIGN KEY(wordTargetid) REFERENCES word(wordid) ON DELETE SET NULL ON UPDATE CASCADE)");
+                    "PRIMARY KEY(`relationid`)," +
+                    "FOREIGN KEY(`wordSourceid`) REFERENCES word(`wordid`) ON DELETE CASCADE ON UPDATE CASCADE," +
+                    "FOREIGN KEY(`wordTargetid`) REFERENCES word(`wordid`) ON DELETE SET NULL ON UPDATE CASCADE)");
 
                 //log
                 con.Execute("DROP TABLE IF EXISTS `babellog`");

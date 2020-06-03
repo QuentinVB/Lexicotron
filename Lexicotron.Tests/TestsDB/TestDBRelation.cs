@@ -20,10 +20,9 @@ namespace Lexicotron.Tests.TestsDB
             //_primeService = new PrimeService();
             defaultDbWord = new DbWord { Word = "test", SynsetId = "b:fzf4687", CreationDate = DateTime.Today };
             defaultDbWord2 = new DbWord { Word = "test2", SynsetId = "b:vdqvqdv45", CreationDate = DateTime.Today };
-            defaultRelation = new DbRelation { WordSourceId = 1, WordTargetId = 2, RelationGroup = "Hyponym", TargetSynsetId = defaultDbWord2.SynsetId, CreationDate = DateTime.Today };
+            defaultRelation = new DbRelation { WordSourceId = 1, WordTargetId = 2, RelationGroup = "hypernym", TargetSynsetId = defaultDbWord2.SynsetId, CreationDate = DateTime.Today };
         }
-        
-       
+
         [TestMethod]
         public void TestAddRelationFromRelation()
         {
@@ -64,6 +63,46 @@ namespace Lexicotron.Tests.TestsDB
             //act-assert
             sut.TryAddRelation(defaultDbWord2.Word, "b:578764644", "Hyperonym").Should().BeTrue();
             sut.SynsetIdToSearch.Count.Should().Be(1);
+            //restore
+            sut.DeleteDatabase();
+        }
+
+        [TestMethod]
+        public void TestRelationsOfWord()
+        {
+            //arrange
+            LocalWordDB sut = new LocalWordDB();
+            sut.CreateDatabase();
+
+            sut.TryAddWord(defaultDbWord.Word, defaultDbWord.SynsetId).Should().BeTrue();
+            sut.TryAddWord(defaultDbWord2.Word, defaultDbWord2.SynsetId).Should().BeTrue();
+            sut.TryAddRelation(defaultRelation).Should().BeTrue();
+
+            //act-assert
+            var wordreturned = sut.TryGetRelationCount(defaultDbWord);
+            wordreturned.Word.Should().Be(defaultDbWord.Word);
+            wordreturned.HyperonymCount.Should().Be(1);
+            //no hyponym !!!
+
+            //restore
+            sut.DeleteDatabase();
+        }
+
+        [TestMethod]
+        public void TestNoRelationsOfWord()
+        {
+            //arrange
+            LocalWordDB sut = new LocalWordDB();
+            sut.CreateDatabase();
+
+            sut.TryAddWord(defaultDbWord.Word, defaultDbWord.SynsetId).Should().BeTrue();
+
+            //act-assert
+            var wordreturned = sut.TryGetRelationCount(defaultDbWord);
+            wordreturned.Word.Should().Be(defaultDbWord.Word);
+            wordreturned.HyperonymCount.Should().Be(0);
+            //no hyponym !!!
+
             //restore
             sut.DeleteDatabase();
         }

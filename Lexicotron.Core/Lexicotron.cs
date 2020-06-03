@@ -14,7 +14,7 @@ namespace Lexicotron.Core
     public class Lexicotron
     {
         List<Word> lexicon;
-        private Dictionary<string, string[]> lexicalField;
+        private Dictionary<string, string[]> lexicalFields;
         DALAdapter _dal;
 
         /// <summary>
@@ -24,8 +24,9 @@ namespace Lexicotron.Core
         /// <summary>
         /// the lexical field association, word->lexicalfields[], loaded from csv or excel file
         /// </summary>
-        public Dictionary<string, string[]> LexicalField { get => lexicalField; set => lexicalField = value; }
+        public Dictionary<string, string[]> LexicalFields { get => lexicalFields; set => lexicalFields = value; }
         internal DALAdapter Database { get => _dal; set => _dal = value; }
+        public string[] LexicalFieldsList { get; set; }
 
         public Lexicotron()
         {
@@ -84,7 +85,7 @@ namespace Lexicotron.Core
         public List<Article> ProcessDirectory(string path)//async -> return async enumerable (glup) ?
         {
             if (Lexicon == null) throw new InvalidOperationException("the lexic database is not loaded");
-            if (LexicalField == null) throw new InvalidOperationException("the lexical field database is not loaded");
+            if (LexicalFields == null) throw new InvalidOperationException("the lexical field database is not loaded");
 
             List<Article> _articles = new List<Article>();
 
@@ -104,11 +105,12 @@ namespace Lexicotron.Core
                 //ADD processing operations here
                 GetWordsInfo(article);
 
-                //add more lexical fields ?
+                //add lexical fields and summarize them by article
                 GetLexicalFields(article);
 
                 //merge Lemme
                 MergeLemme(article);
+
 
                 //insert word in db
                 //TODO: improve logging
@@ -124,7 +126,11 @@ namespace Lexicotron.Core
             return _articles;
         }
 
-        
+        private void SummarizeLexicalFields(Article article)
+        {
+        }
+
+
 
         /*
 VER
@@ -181,9 +187,21 @@ NOM
         {
             foreach (WordProcessed word in article.Words.Values)
             {
-                if(LexicalField.TryGetValue(word.Word, out string[] lexicalFields))
+                if(LexicalFields.TryGetValue(word.Word, out string[] lexicalFields))
                 {
-                    word.LexicalField = String.Join(";", lexicalFields);
+
+                    for (int i = 0; i < lexicalFields.Length; i++)
+                    {
+                        word.LexicalFieldCollection.Add(lexicalFields[i]);
+                        if(article.LexicalFieldCount.ContainsKey(lexicalFields[i]))
+                        {
+                            article.LexicalFieldCount[lexicalFields[i]]++;
+                        }
+                        else
+                        {
+                            article.LexicalFieldCount.Add(lexicalFields[i], 1);
+                        }
+                    }
                 }
             }
         }
@@ -201,7 +219,7 @@ NOM
                          GrammarCategory = nw.First().GrammarCategory,
                          Lemme = nw.First().Lemme,
                          FrequenceLemme = nw.First().FrequenceLemme,
-                         LexicalField = nw.First().LexicalField,
+                         LexicalFieldCollection = nw.SelectMany(item=>item.LexicalFieldCollection).Distinct().ToHashSet()
                      })
                      .ToDictionary(g => g.Word, g => g);
         }

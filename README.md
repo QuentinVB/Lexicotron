@@ -41,3 +41,5 @@ https://babelnet.io/v5/getSynsetIds?lemma={lemma}&searchLang={searchLang}&key={k
 targetLang=FR
 
 https://app.quicktype.io
+
+humain

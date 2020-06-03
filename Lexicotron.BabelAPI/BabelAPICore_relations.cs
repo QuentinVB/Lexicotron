@@ -48,19 +48,28 @@ namespace Lexicotron.BabelAPI
         
         public async Task<(BabelLog, DbWord, List<BabelEdge>)> GetBabelRelationsAsync(DbWord word)
         {
-            HttpResponseMessage response = await client.GetAsync(
-                $"https://babelnet.io/v5/getOutgoingEdges?id={word.SynsetId}&key={Apikey}"
-                );
-            if (response.IsSuccessStatusCode)
+            try
             {
-                //using newton soft
-                //Project m = JsonConvert.DeserializeObject<Project>(await response.Content.ReadAsStringAsync());
-                var babelsense = response.Content.ReadAsAsync<List<BabelEdge>>().Result;
+                HttpResponseMessage response = await client.GetAsync(
+                    $"https://babelnet.io/v5/getOutgoingEdges?id={word.SynsetId}&key={Apikey}"
+                );
+                if (response.IsSuccessStatusCode)
+                {
+                    //using newton soft
+                    //Project m = JsonConvert.DeserializeObject<Project>(await response.Content.ReadAsStringAsync());
+                    var babelsense = response.Content.ReadAsAsync<List<BabelEdge>>().Result;
 
-                BabelLog logentry = new BabelLog() {RequestedSynset = word.SynsetId, JsonReturned = response.Content.ReadAsStringAsync().Result };
+                    BabelLog logentry = new BabelLog() { RequestedSynset = word.SynsetId, JsonReturned = response.Content.ReadAsStringAsync().Result };
 
-                return (logentry, word, babelsense);
+                    return (logentry, word, babelsense);
+                }
             }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
+            
             throw new TimeoutException();
         }
 

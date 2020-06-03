@@ -10,6 +10,11 @@ namespace Lexicotron.Core
     /// </summary>
     public class WordProcessed : IWord
     {
+        public WordProcessed()
+        {
+            LexicalFieldCollection = new HashSet<string>();
+        }
+
         /// <summary>
         /// The given word
         /// </summary>
@@ -42,7 +47,12 @@ namespace Lexicotron.Core
         /// <summary>
         /// The lexical fields of the word, separed by semicolon
         /// </summary>
-        public string LexicalField { get; set; }
+        public string LexicalField { get => String.Join(";", LexicalFieldCollection); }
+        /// <summary>
+        /// The collection of lexicalFields, should be distincts
+        /// </summary>
+        [NonPrintable]
+        public HashSet<string> LexicalFieldCollection { get; set; }
 
         /*HyponymCount, HyperonymCount
          */

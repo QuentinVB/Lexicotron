@@ -12,6 +12,7 @@ namespace Lexicotron.Core
         readonly string _filename;
         int _totalWordCount=0;
         Dictionary<string,WordProcessed> _words;
+        Dictionary<string, int> _lexicalFieldCount;
 
        
 
@@ -38,6 +39,7 @@ namespace Lexicotron.Core
         {
             _filename = filename;
             _words = words;
+            _lexicalFieldCount = new Dictionary<string, int>();
         }
         /// <summary>
         /// The collection of words contained in the article. The reactor uranium fuel !
@@ -46,6 +48,12 @@ namespace Lexicotron.Core
         [Ignore]
         [NonPrintable]
         public Dictionary<string, WordProcessed> Words { get => _words; set => _words = value; }
+
+        /// <summary>
+        /// The collection of lexical fields and occurence in the article
+        /// </summary>
+        [NonPrintable]
+        public Dictionary<string, int> LexicalFieldCount { get => _lexicalFieldCount; set => _lexicalFieldCount = value; }
 
         public string Filename => _filename;
         public int TotalWordCount { get => _totalWordCount; }
@@ -76,6 +84,8 @@ namespace Lexicotron.Core
         /// <returns>true if the word is added</returns>
         public bool AddWord(string word)
         {
+            _totalWordCount++;
+
             if (_words.ContainsKey(word))
             {
                 _words[word].Occurence++;
@@ -107,7 +117,7 @@ namespace Lexicotron.Core
                 Lemme = "test",
                 FrequenceLemme = 1,
                 GrammarCategory = "noun",
-                LexicalField = "test"
+                LexicalFieldCollection = new HashSet<string>() { "test" }
             });
 
             return dummy;

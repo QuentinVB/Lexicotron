@@ -73,14 +73,14 @@ namespace Lexicotron.UI
             Console.WriteLine($"Executing folder is {directory}");
             Console.WriteLine("Processing...");
 
-            List<ArticleGroup> articles = lexicotron.ProcessAllDirectory(directory + @"\Input\");//
+            List<ArticleGroup> articlegroups = lexicotron.ProcessAllDirectory(directory + @"\Input\");//
 
             //TODO : make it async with progression bar 
             Console.WriteLine("Write to excel file...");
 
-            foreach (ArticleGroup article in articles)
+            foreach (ArticleGroup articlegroup in articlegroups)
             {
-                FileWriter.PrintArticlesToExcel(article, startTimestamp); ;
+                FileWriter.PrintArticlesToExcel(articlegroup, lexicotron.LexicalFieldsList, startTimestamp); ;
             }
             
 
@@ -138,7 +138,7 @@ namespace Lexicotron.UI
 
             LocalWordDB database = new LocalWordDB();
             BabelAPICore babelAPI = new BabelAPICore(apikey, database);
-            Console.WriteLine("{0} remaining request for today : {1} ", database.GetTodayBabelRequestsCount(), DateTime.Today.ToString());
+            Console.WriteLine("{0} remaining request for today : {1} ", 1000-database.GetTodayBabelRequestsCount(), DateTime.Today.ToString());
 
             int amount = 100;
             Console.WriteLine("try to retrieve {0} relations", amount);
@@ -154,6 +154,7 @@ namespace Lexicotron.UI
             //TODO : insert retrieved relations into database and update the word to said they have relations now
             var results = database.TryAddRelations(dbRelationToUpdate);
             Console.WriteLine("{0} relations inserted", results);
+
 
             int wordsWithRelationUpdated = database.UpdateWordRelationStatus(relations.Select(x=>x.Item2), true);
             
@@ -190,12 +191,15 @@ namespace Lexicotron.UI
                 if (finished == loadLexicon)
                 {
                     lexicotron.Lexicon = loadLexicon.Result;
-                    Console.WriteLine("Lexic loaded !");
+                    Console.WriteLine($"{lexicotron.Lexicon.Count} words from Lexic loaded !");
                 }
                 else if(finished == loadLexicalField)
                 {
-                    lexicotron.LexicalField = loadLexicalField.Result;
-                    Console.WriteLine("Lexical fields loaded !");
+                    var result = loadLexicalField.Result;
+                    lexicotron.LexicalFields = result.Item1;
+                    lexicotron.LexicalFieldsList = result.Item2;
+
+                    Console.WriteLine($"{lexicotron.LexicalFieldsList.Length} lexicals fields loaded !");
                 }
 
                 allTasks.Remove(finished);
@@ -220,9 +224,9 @@ namespace Lexicotron.UI
             return Task.FromResult(result);
         }
 
-        private static Task<Dictionary<string,string[]>> loadLexicalFieldAsync()
+        private static Task<(Dictionary<string,string[]>,string[])> loadLexicalFieldAsync()
         {
-            Dictionary<string, string[]> result;
+            (Dictionary<string, string[]>, string[]) result;
             try
             {
                 result = ExcelLoader.LoadLexicalField(Helpers.GetExecutingDirectoryPath() + @"\Data\ChampsLexicaux.xlsx");

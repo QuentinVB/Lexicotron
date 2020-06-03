@@ -52,7 +52,7 @@ namespace Lexicotron.Core
             
         }
 
-        public static void PrintArticlesToExcel(ArticleGroup articleGroup, string stamp)
+        public static void PrintArticlesToExcel(ArticleGroup articleGroup, string[] lexicalFields, string stamp)
         {
             Console.WriteLine($" Writing {stamp}-{articleGroup.Name}.xlsx");
             List<Article> articles = articleGroup.Articles;
@@ -94,28 +94,51 @@ namespace Lexicotron.Core
                 xlWorkSheet.Name = article.Filename.Truncate(30);
 
                 //print headers
-                PropertyInfo[] wordProperties = typeof(WordProcessed).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                for (int i = 0; i < wordProperties.Length; i++)
+                List<PropertyInfo> printableWordsProperties = new List<PropertyInfo>();
+
+
+                foreach (PropertyInfo p in typeof(WordProcessed).GetProperties(BindingFlags.Public | BindingFlags.Instance))
                 {
-                    xlWorkSheet.Cells[1, i+1] = wordProperties[i].Name.ToString();
+
+                    System.Attribute[] attrs = System.Attribute.GetCustomAttributes(p);
+
+                    //TODO : rework with select where or any
+                    bool isPrintable = true;
+                    foreach (System.Attribute attr in attrs)
+                    {
+                        if (attr is NonPrintable)
+                        {
+                            isPrintable = false;
+                        }
+                    }
+                    if (isPrintable)
+                    {
+                        printableWordsProperties.Add(p);
+                    }
+                }
+                for (int i = 0; i < printableWordsProperties.Count; i++)
+                {
+                    
+
+                    xlWorkSheet.Cells[1, i+1] = printableWordsProperties[i].Name.ToString();
                 }
 
                 //print rows
                 for (int j = 0; j < words.Count; j++)
                 {
-                    for (int k = 0; k < wordProperties.Length; k++)
+                    for (int k = 0; k < printableWordsProperties.Count; k++)
                     {
                         xlWorkSheet.Cells[j+2, k+1] =
                             words[j]
                             .GetType()
-                            .GetProperty(wordProperties[k].Name)
+                            .GetProperty(printableWordsProperties[k].Name)
                             .GetValue(words[j], null) ?? "";
                     }
                 }
                 Marshal.ReleaseComObject(xlWorkSheet);
             }
 
-            //Print summary
+            //Print summary===============================================================
 
             //select add before first sheet
             xlWorkSheet = (Excel.Worksheet)worksheets.Add(worksheets[1], Type.Missing, Type.Missing, Type.Missing);
@@ -148,7 +171,7 @@ namespace Lexicotron.Core
                 xlWorkSheet.Cells[1, i + 1] = printableArticleProperties[i].Name.ToString();
             }
 
-            //print rows
+            //print rows : col : i, row k
             for (int j = 0; j < articles.Count; j++)
             {
                 for (int k = 0; k < printableArticleProperties.Count; k++)
@@ -160,6 +183,28 @@ namespace Lexicotron.Core
                         .GetValue(articles[j], null) ?? "";
                 }
             }
+
+            //print lexical fields
+            for (int i = 0; i < lexicalFields.Length; i++)
+            {
+                xlWorkSheet.Cells[1, i + printableArticleProperties.Count + 1] = lexicalFields[i];
+            }
+            
+            for (int i = 0; i < articles.Count; i++)
+            {
+                for(int j = 0; j < lexicalFields.Length;j++)
+                {
+                    int count = 0;
+
+                    if (articles[i].LexicalFieldCount.TryGetValue(lexicalFields[j], out int result)) count = result; 
+
+                    xlWorkSheet.Cells[i + 2, j + printableArticleProperties.Count + 1] = count;
+                }
+            }
+
+
+
+
             Marshal.ReleaseComObject(xlWorkSheet);
 
 

@@ -105,7 +105,7 @@ namespace Lexicotron.Database
                 }
             }
         }
-        public bool TryGetRelationCount(DbWord word)
+        public DbWord TryGetRelationCount(DbWord word)
         {
             if (!File.Exists(DbFile)) throw new FileNotFoundException("no database");
             if (word.Word == null) throw new ArgumentNullException();
@@ -117,18 +117,21 @@ namespace Lexicotron.Database
                     //https://sql.sh/cours/insert-into
                     string sql = "SELECT w.wordid, w.word, w.synsetId, w.creationDate, r.hyperonymCount FROM `word` AS w " +
                         "INNER JOIN" +
-                        "(SELECT `wordSource`, count(`relationid`) as hyperonymCount FROM `relation` WHERE `relationGroup` = 'hypernym') as r" +
-                        "ON w.wordid = r.wordSource" +
+                        "(SELECT `wordSourceid`, count(`relationid`) as hyperonymCount FROM `relation` WHERE `relationGroup` = 'hypernym') AS r " +
+                        "ON w.wordid = r.wordSourceid " +
                         "WHERE `word` = @Word";//da big request ever
 
-                    cnn.Query<DbWord>(sql, word);
-                    return true;
+                    DbWord returnedWord = cnn.QueryFirstOrDefault<DbWord>(sql, word);
+
+                    if (returnedWord ==null || returnedWord.Word != word.Word) return word;
+                    return returnedWord;
                 }
                 catch (SqlException ex)
                 {
                     if (ex.Number == 2601 || ex.Number == 2627)
                     {
-                        return false;
+                        throw;
+
                     }
                     throw;
                 }
