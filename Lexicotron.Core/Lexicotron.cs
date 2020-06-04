@@ -15,6 +15,7 @@ namespace Lexicotron.Core
     {
         List<Word> lexicon;
         private Dictionary<string, string[]> lexicalFields;
+        private Dictionary<string, string[]> lexicalFieldToWords;
         DALAdapter _dal;
 
         /// <summary>
@@ -25,6 +26,7 @@ namespace Lexicotron.Core
         /// the lexical field association, word->lexicalfields[], loaded from csv or excel file
         /// </summary>
         public Dictionary<string, string[]> LexicalFields { get => lexicalFields; set => lexicalFields = value; }
+        public Dictionary<string, string[]> LexicalFieldsToWords { get => lexicalFieldToWords; set => lexicalFieldToWords = value; }
         internal DALAdapter Database { get => _dal; set => _dal = value; }
         public string[] LexicalFieldsList { get; set; }
 
@@ -75,6 +77,31 @@ namespace Lexicotron.Core
             ExploreFolder(path, "");
 
             return _articleGroups;
+        }
+
+        public Dictionary<string, double> ProcessLexicalField()
+        {
+            if (Lexicon == null) throw new InvalidOperationException("the lexic database is not loaded");
+            if (LexicalFieldsToWords == null) throw new InvalidOperationException("the lexical field to word database is not loaded");
+            Dictionary<string, double> lexicalFieldFrequency = new Dictionary<string, double>();
+
+            for (int i = 0; i < LexicalFieldsList.Length; i++)
+            {
+                string lexicalFieldName = LexicalFieldsList[i];
+
+                string[] wordInLexicalField = LexicalFieldsToWords[lexicalFieldName];
+
+                double weight = 0;
+
+                for (int j = 0; j < wordInLexicalField.Length; j++)
+                {
+                    Word word = Lexicon.Where(w => w.ortho == wordInLexicalField[j]).FirstOrDefault();
+                    weight += (word==null?0:word.freqlemfilms) / wordInLexicalField.Length;
+                }
+                lexicalFieldFrequency.Add(lexicalFieldName, weight);
+            }
+
+            return lexicalFieldFrequency;
         }
 
         /// <summary>

@@ -9,6 +9,9 @@ using Newtonsoft.Json.Converters;
 
 namespace Lexicotron.BabelAPI.Models
 {
+    /// <summary>
+    /// The model of Babel Edge from BabelNET API, it describe extending concept (synset) from a requested synset
+    /// </summary>
     public partial class BabelEdge
     {
         [JsonProperty("language")]
@@ -26,7 +29,9 @@ namespace Lexicotron.BabelAPI.Models
         [JsonProperty("normalizedWeight")]
         public long NormalizedWeight { get; set; }
     }
-
+    /// <summary>
+    /// Sub mode for Babel Edge, it describe the targeted concept of the edge (a synset)
+    /// </summary>
     public partial class Pointer
     {
         [JsonProperty("fSymbol")]
@@ -39,7 +44,7 @@ namespace Lexicotron.BabelAPI.Models
         public string ShortName { get; set; }
 
         [JsonProperty("relationGroup")]
-        /* 
+        /* Possible group relation :
             HYPERNYM
             OTHER
             HOLONYM
@@ -51,6 +56,7 @@ namespace Lexicotron.BabelAPI.Models
         public bool IsAutomatic { get; set; }
     }
 }
+///JSON Example
 /*
  {
         "language": "EN",
@@ -65,9 +71,4 @@ namespace Lexicotron.BabelAPI.Models
         "weight": 0.0,
         "normalizedWeight": 0.0
     },
- relationGroup:
- HYPERNYM
-OTHER
-HOLONYM
-HYPONYM
  */

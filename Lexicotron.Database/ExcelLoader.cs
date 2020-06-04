@@ -46,11 +46,12 @@ namespace Lexicotron.Database
             Marshal.ReleaseComObject(xlApp);
         }
 
-        public static (Dictionary<string,string[]>,string[]) LoadLexicalField(string path)
+        public static (Dictionary<string,string[]>,string[], Dictionary<string, string[]>) LoadLexicalField(string path)
         {
             //TODO: make it cleaner
             //word->lexical fields
             Dictionary<string, string[]> _lexicalFieldAssociations = new Dictionary<string, string[]>();
+            Dictionary<string, string[]> _lexicalFieldToWordsAssociations = new Dictionary<string, string[]>();
             List<string> lexicalFields= new List<string>();
 
             Excel.Application xlApp;
@@ -80,6 +81,8 @@ namespace Lexicotron.Database
 
                 string[] words = ((string)(range.Cells[rCnt, 2] as Excel.Range).Value2).Split(';');
 
+                _lexicalFieldToWordsAssociations.Add(lexicalField, words);
+
                 for (int i = 0; i < words.Length; i++)
                 {
                     if (_lexicalFieldAssociations.ContainsKey(words[i]))
@@ -107,7 +110,7 @@ namespace Lexicotron.Database
             Marshal.ReleaseComObject(xlWorkBook);
             Marshal.ReleaseComObject(xlApp);
 
-            return (_lexicalFieldAssociations,lexicalFields.ToArray());
+            return (_lexicalFieldAssociations,lexicalFields.ToArray(), _lexicalFieldToWordsAssociations);
         }
     }
 }

@@ -10,6 +10,9 @@ using Newtonsoft.Json.Converters;
 
 namespace Lexicotron.BabelAPI.Models
 {
+    /// <summary>
+    /// The root model of Babel Sense from BabelNET API
+    /// </summary>
     public partial class BabelSense
     {
         [JsonProperty("type")]
@@ -18,7 +21,9 @@ namespace Lexicotron.BabelAPI.Models
         [JsonProperty("properties")]
         public Properties Properties { get; set; }
     }
-
+    /// <summary>
+    /// Sub model of Babel Sense, it describe a requested lemma (lemma, pronunciation, synet ID)
+    /// </summary>
     public partial class Properties
     {
         [JsonProperty("fullLemma")]
@@ -58,7 +63,9 @@ namespace Lexicotron.BabelAPI.Models
         [JsonProperty("idSense")]
         public string IdSense { get; set; }
     }
-
+    /// <summary>
+    /// A sub class of babel sense, describe pronunciation of a lemma
+    /// </summary>
     public partial class Pronunciations
     {
         [JsonProperty("audios")]
@@ -67,7 +74,9 @@ namespace Lexicotron.BabelAPI.Models
         [JsonProperty("transcriptions")]
         public string[] Transcriptions { get; set; }
     }
-
+    /// <summary>
+    /// a sub class of babel sense, describe the synset of the lemma
+    /// </summary>
     public partial class SynsetId
     {
         [JsonProperty("id")]
@@ -80,7 +89,7 @@ namespace Lexicotron.BabelAPI.Models
         public string Source { get; set; }
     }
 }
-
+///JSON example
 /*
 Lexicotron.BabelAPI.Models 
      {

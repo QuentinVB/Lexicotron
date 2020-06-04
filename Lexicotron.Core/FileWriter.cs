@@ -219,5 +219,65 @@ namespace Lexicotron.Core
             Console.WriteLine($" Finished writing !");
 
         }
+
+
+
+        public static void PrintLexicalFieldsToExcel(Dictionary<string,double> lexicalFieldsFrequency, string stamp)
+        {
+            Console.WriteLine($" Writing {stamp}-lexicalFields.xlsx");
+
+            Excel.Application xlApp = new Excel.Application();
+
+            string path = Helpers.GetExecutingDirectoryPath() + $"\\Output\\{stamp}-lexicalFields.xlsx";
+
+
+            if (xlApp == null)
+            {
+                throw new DllNotFoundException("Excel is not correctly installed");
+            }
+
+
+            Excel.Workbook xlWorkBook;
+
+            object misValue = Missing.Value;
+            xlWorkBook = xlApp.Workbooks.Add(misValue);
+
+            Excel.Sheets worksheets = xlWorkBook.Worksheets;
+            Excel.Worksheet xlWorkSheet;
+
+            //select first sheet
+            xlWorkSheet = (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
+            xlWorkSheet.Name = "lexical fields";
+
+
+            //print header
+            xlWorkSheet.Cells[1, 1] = "lexicalField";
+            xlWorkSheet.Cells[1, 2] = "averageFrequency";
+
+            int x = 2;
+
+            foreach (KeyValuePair<string,double> lexicalFieldFrequency in lexicalFieldsFrequency)
+            {
+                xlWorkSheet.Cells[x, 1] = lexicalFieldFrequency.Key;
+                xlWorkSheet.Cells[x, 2] = lexicalFieldFrequency.Value;
+                x++;
+
+            }
+
+            
+
+            Marshal.ReleaseComObject(xlWorkSheet);
+
+
+            xlWorkBook.SaveAs(path, Excel.XlFileFormat.xlOpenXMLWorkbook, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue, misValue, misValue, misValue);
+            xlWorkBook.Close(true, misValue, misValue);
+            Marshal.ReleaseComObject(xlWorkBook);
+
+            xlApp.Quit();
+
+
+            Marshal.ReleaseComObject(xlApp);
+            Console.WriteLine($" Finished writing !");
+        }
     }
 }
